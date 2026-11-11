@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Van Excel naar sturen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: één kolom die van koud (Excel) naar warm (sturen) loopt; de warmteleiding is het enige uitgesproken element. */
+:root{
+  --paper:#F4F6F7;
+  --surface:#FFFFFF;
+  --ink:#14212B;
+  --muted:#5A6873;
+  --line:#D9E0E4;
+  --cold:#2F6C8F;
+  --hot:#D4521C;
+  --mid:#C08A1E;
+  --good:#2E7D4F;
+  --warn:#B7791F;
+  --bad:#B4382B;
+  --soft:#E9EEF1;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F171D; --surface:#16222A; --ink:#E6EDF1; --muted:#97A6B0; --line:#2A3943;
+    --cold:#6FA8CB; --hot:#F07A45; --mid:#E0AE4A; --good:#5CB884; --warn:#E0AE4A; --bad:#E7756A; --soft:#1C2A33;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F171D; --surface:#16222A; --ink:#E6EDF1; --muted:#97A6B0; --line:#2A3943;
+  --cold:#6FA8CB; --hot:#F07A45; --mid:#E0AE4A; --good:#5CB884; --warn:#E0AE4A; --bad:#E7756A; --soft:#1C2A33;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+a{color:var(--cold)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+@media (max-width:480px){.wrap{padding:0 16px}}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,5.2vw,4rem);line-height:1.02;font-weight:800}
+h2{font-size:clamp(1.6rem,3vw,2.2rem);line-height:1.1;font-weight:700}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+.lead{font-size:1.15rem;color:var(--muted);max-width:62ch}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.kicker{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+section{padding:64px 0;border-top:1px solid var(--line)}
+.sec-head{display:grid;gap:10px;margin-bottom:28px;max-width:70ch}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--hot);outline-offset:2px;border-radius:4px}
+
+/* Hero */
+header.hero{padding:56px 0 40px}
+.hero-grid{display:grid;gap:22px}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:40px}
+.brand .name{font-family:var(--display);font-weight:700;font-size:1.05rem}
+.brand .tag{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+.hero h1 .c{color:var(--cold)}
+.hero h1 .h{color:var(--hot)}
+.pipe{margin-top:36px;overflow-x:auto;padding-bottom:6px}
+.pipe-inner{position:relative;min-width:760px;display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding-top:30px}
+.pipe-line{position:absolute;left:10%;right:10%;top:44px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--cold),var(--mid) 60%,var(--hot))}
+.node{position:relative;display:grid;justify-items:center;gap:8px;text-align:center;background:none;border:0;padding:0 6px;cursor:pointer}
+.node .dot{width:34px;height:34px;border-radius:50%;background:var(--surface);border:4px solid var(--c);display:grid;place-items:center;font-family:var(--mono);font-size:.8rem;font-weight:500;color:var(--ink);transition:transform .15s}
+.node:hover .dot{transform:scale(1.12)}
+.node[aria-current="true"] .dot{background:var(--c);color:#fff}
+.node .t{font-family:var(--display);font-weight:700;font-size:1rem}
+.node .d{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.node .badge{font-family:var(--mono);font-size:.68rem;padding:2px 7px;border-radius:999px;background:var(--hot);color:#fff;visibility:hidden}
+.node.rec .badge{visibility:visible}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+
+/* Scan */
+.scan{display:grid;grid-template-columns:1.25fr 1fr;gap:24px;align-items:start}
+@media (max-width:860px){.scan{grid-template-columns:1fr}}
+.layers{display:grid;gap:14px}
+.layer{display:grid;gap:10px}
+.layer-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.layer-top .q{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+.levels{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.lv{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 4px;cursor:pointer;font-family:var(--mono);font-size:.85rem;transition:background .12s,border-color .12s}
+.lv:hover{border-color:var(--cold)}
+.lv[aria-pressed="true"]{background:var(--lvc,var(--cold));border-color:var(--lvc,var(--cold));color:#fff}
+.lv-desc{font-size:.92rem;color:var(--muted);min-height:2.8em}
+.result{display:grid;gap:18px;position:sticky;top:16px}
+.radar-box{display:grid;place-items:center}
+.radar text{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.radar .ax{stroke:var(--line)}
+.radar .ring{fill:none;stroke:var(--line)}
+.radar .target{fill:none;stroke:var(--hot);stroke-dasharray:4 4;stroke-width:1.5}
+.radar .cur{fill:color-mix(in srgb,var(--cold) 22%,transparent);stroke:var(--cold);stroke-width:2.5}
+.radar .pt{fill:var(--cold)}
+.advice{display:grid;gap:10px}
+.advice .big{font-family:var(--display);font-size:1.6rem;font-weight:800;line-height:1.1}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.75rem;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--paper)}
+.pill .sw{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.prio{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.prio li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:.95rem}
+.prio .n{font-family:var(--mono);font-size:.78rem;background:var(--soft);border-radius:6px;padding:2px 7px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:8px;padding:10px 16px;cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:hover{opacity:.9}
+.note{font-size:.85rem;color:var(--muted)}
+#copyFallback{display:none;width:100%;min-height:140px;font-family:var(--mono);font-size:.8rem;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px}
+
+/* Roadmap */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;cursor:pointer;display:flex;gap:8px;align-items:center;font-weight:500}
+.tab .sw{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.tab[aria-selected="true"]{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
+.tab .rec{font-family:var(--mono);font-size:.68rem;color:var(--hot);display:none}
+.tab.is-rec .rec{display:inline}
+.phase{border-top:6px solid var(--c)}
+.phase-head{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:18px}
+.phase-head .meta{display:flex;gap:8px;flex-wrap:wrap}
+.phase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media (max-width:860px){.phase-grid{grid-template-columns:1fr}}
+.blk{display:grid;gap:8px;align-content:start}
+.blk h4{margin:0;font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.blk ul{margin:0;padding-left:18px;display:grid;gap:5px;font-size:.95rem}
+.gate{margin-top:18px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;background:var(--soft);border-radius:10px;padding:14px 16px}
+.gate .ic{font-family:var(--mono);font-size:.75rem;background:var(--c);color:#fff;border-radius:6px;padding:3px 8px;white-space:nowrap}
+
+/* Tools */
+.size{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.seg{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:.92rem}
+.seg[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:.95rem}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--paper)}
+tr:last-child td{border-bottom:0}
+td .arrow{color:var(--hot);font-family:var(--mono)}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:20px}
+.why .card{padding:16px}
+.why p{font-size:.93rem;color:var(--muted)}
+
+/* Pyramid */
+.pyr{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media (max-width:860px){.pyr{grid-template-columns:1fr}}
+.tiers{display:grid;gap:6px}
+.tier{border:0;text-align:left;cursor:pointer;border-radius:8px;padding:12px 16px;background:var(--soft);display:grid;gap:2px;justify-self:center;width:var(--w);transition:background .12s}
+.tier .tl{font-family:var(--display);font-weight:700}
+.tier .ts{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.tier[aria-pressed="true"]{background:var(--c);color:#fff}
+.tier[aria-pressed="true"] .ts{color:rgba(255,255,255,.85)}
+.dash-list{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.dash-list li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.dash-list .n{font-family:var(--mono);font-size:.8rem;width:26px;height:26px;border-radius:6px;display:grid;place-items:center;background:var(--soft)}
+.dash-list strong{display:block}
+.dash-list span{font-size:.92rem;color:var(--muted)}
+
+/* Pitfalls */
+.pits{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.pit{display:grid;gap:8px;border-left:4px solid var(--bad)}
+.pit .fix{font-size:.92rem;color:var(--muted)}
+.pit .fix b{color:var(--good);font-weight:600}
+
+/* Offer */
+.offer{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media (max-width:960px){.offer{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.offer{grid-template-columns:1fr}}
+.mod{border-top:5px solid var(--c);display:grid;gap:8px;align-content:start}
+.mod .k{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.mod p{font-size:.92rem;color:var(--muted)}
+.cta{margin-top:28px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;background:var(--ink);color:var(--paper);border-radius:14px;padding:28px}
+.cta h3{font-size:1.5rem}
+.cta p{color:color-mix(in srgb,var(--paper) 78%,transparent)}
+.cta .btn{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+@media (max-width:700px){.cta{grid-template-columns:1fr}}
+footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div class="brand">
+      <a class="name" href="https://www.benable.nl" style="color:inherit;text-decoration:none">B.Enable · Warmte Control Framework</a>
+      <span class="tag">Implementatie in vijf fases</span>
+    </div>
+    <h1>Van losse <span class="c">Excel-bestanden</span> naar een warmtebedrijf dat <span class="h">stuurt</span>.</h1>
+    <p class="lead">"Mooi model, maar zover zijn we nog niet." Dat hoeft ook niet. Je groeit in vijf vaste stappen naar betrouwbare stuurinformatie, en elke stap levert het management direct iets op.</p>
+    <nav class="pipe" aria-label="Fases van het stappenplan">
+      <div class="pipe-inner" id="pipe">
+        <div class="pipe-line" aria-hidden="true"></div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="scan">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">Stap 1 · Waar staan jullie?</span>
+        <h2>Zelfscan in vier lagen</h2>
+        <p class="lead">Kies per laag het niveau dat het best past. Het voorbeeld is ingevuld zoals we het vaak zien bij een kleiner warmtebedrijf. Op basis van je antwoorden zie je waar het stappenplan voor jullie begint.</p>
+      </div>
+      <div class="scan">
+        <div class="layers card" id="layers"></div>
+        <aside class="result card" aria-live="polite">
+          <div class="radar-box"><svg class="radar" id="radar" viewBox="0 0 300 260" width="100%" style="max-width:330px" role="img" aria-label="Volwassenheid per laag"></svg></div>
+          <div class="advice">
+            <span class="kicker">Advies</span>
+            <div class="big" id="advBig"></div>
+            <p id="advText" class="note"></p>
+            <ol class="prio" id="advPrio"></ol>
+          </div>
+          <div class="actions">
+            <button class="btn" id="copyBtn" type="button">Kopieer scanresultaat</button>
+            <button class="btn ghost" id="toPhase" type="button">Bekijk de startfase</button>
+          </div>
+          <textarea id="copyFallback" aria-label="Scanresultaat om te kopiëren" readonly></textarea>
+          <p class="note"><span class="pill"><span class="sw" style="--c:var(--cold)"></span>huidig</span> <span class="pill"><span class="sw" style="--c:var(--hot)"></span>doelbeeld (niveau 4)</span></p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">Stap 2 · Hoe komen we daar?</span>
+        <h2>Het stappenplan per fase</h2>
+        <p class="lead">Fases kunnen deels overlappen. Een organisatie die al verder is, stapt later in. Elke fase eindigt met een duidelijke toets: pas als die gehaald is, heeft de volgende stap zin.</p>
+      </div>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <article class="card phase" id="phase" role="tabpanel"></article>
+    </div>
+  </section>
+
+  <section id="tools">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">Stap 3 · Met welke tools?</span>
+        <h2>Starten met wat er is, doorgroeien als het nodig is</h2>
+        <p class="lead">Het framework is tool-onafhankelijk. In de meeste organisaties met Microsoft 365 is Power BI de logische keuze, en Excel blijft het startpunt. Kies de omvang van je organisatie om de passende inrichting te zien.</p>
+      </div>
+      <div class="size" role="group" aria-label="Omvang organisatie" id="size"></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Functie</th><th>Starten met</th><th>Doorgroeien naar</th><th>Toelichting</th></tr></thead>
+          <tbody id="toolBody"></tbody>
+        </table>
+      </div>
+      <div class="why">
+        <div class="card"><h3>Lage drempel</h3><p>Power Query werkt in Excel en Power BI op dezelfde manier. Wat controllers in fase 1 leren, gebruiken ze in fase 2 en 3 opnieuw.</p></div>
+        <div class="card"><h3>Past in Microsoft 365</h3><p>Dashboards delen via Teams, beveiliging per rol en standaardkoppelingen met veel financiële pakketten.</p></div>
+        <div class="card"><h3>Groeit mee</h3><p>Van een paar bestanden in SharePoint tot een centrale database of Microsoft Fabric, zonder het model opnieuw te bouwen.</p></div>
+        <div class="card"><h3>Ander BI-platform?</h3><p>Gebruik je al Qlik, Tableau of een ander platform, dan richten we het framework daarin in. Alleen de uitvoering verschilt.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="zichtbaar">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">Stap 4 · Hoe maken we het zichtbaar?</span>
+        <h2>De juiste informatie voor elk niveau</h2>
+        <p class="lead">Niet iedereen heeft dezelfde informatie nodig. Klik op een niveau in de piramide om te zien wie het gebruikt, in welke vorm en hoe vaak.</p>
+      </div>
+      <div class="pyr">
+        <div class="card" style="display:grid;gap:16px">
+          <div class="tiers" id="tiers"></div>
+          <div id="tierInfo" class="advice"></div>
+        </div>
+        <div class="card" style="display:grid;gap:14px">
+          <h3>Zes standaarddashboards</h3>
+          <ul class="dash-list">
+            <li><span class="n">1</span><div><strong>MT-overzicht</strong><span>Kernset KPI's met stoplichten, trend en verwacht jaareinde</span></div></li>
+            <li><span class="n">2</span><div><strong>Margeanalyse</strong><span>Warmtemarge, commerciële marge en inkoopmarge, met een afwijkingsbrug in volume, prijs en kostenbijdrage</span></div></li>
+            <li><span class="n">3</span><div><strong>Kosten en investeringen</strong><span>OPEX per afdeling, kosten per aansluiting, CAPEX vs plan</span></div></li>
+            <li><span class="n">4</span><div><strong>Klant en operatie</strong><span>Facturatie, DSO, achterstanden en klantcases</span></div></li>
+            <li><span class="n">5</span><div><strong>Duurzaamheid en energiebalans</strong><span>Bronmix, CO₂-intensiteit, netverlies en onbalans</span></div></li>
+            <li><span class="n">6</span><div><strong>Datakwaliteit</strong><span>Ontbrekende meterstanden, ongemapte grootboekrekeningen, onverklaarde verschillen</span></div></li>
+          </ul>
+          <p class="note">Elke dashboardpagina beantwoordt één vraag: klopt het, waarom, presteren we, of wat gaan we doen?</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="valkuilen">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">Wat we onderweg voorkomen</span>
+        <h2>Zes valkuilen bij het inrichten van controlling</h2>
+      </div>
+      <div class="pits" id="pits"></div>
+    </div>
+  </section>
+
+  <section id="aanbod">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker">Samenwerken</span>
+        <h2>Elke fase los af te nemen</h2>
+        <p class="lead">Je hoeft je niet vooraf aan het hele traject te verbinden. De meeste organisaties beginnen met de quick scan en besluiten daarna over de volgende stap.</p>
+      </div>
+      <div class="offer" id="offer"></div>
+      <div class="cta">
+        <div style="display:grid;gap:8px">
+          <h3>Benieuwd waar jullie staan?</h3>
+          <p>Vul de zelfscan in, kopieer het resultaat en stuur het mee bij je aanvraag. In een kennismaking van 45 minuten bespreken we wat de eerste stap voor jullie organisatie is.</p>
+          <p class="mono" style="font-size:.85rem">Tom Sloots · <a href="mailto:tom@benable.nl" style="color:inherit">tom@benable.nl</a> · <a href="https://www.linkedin.com/in/tpsloots" style="color:inherit">linkedin.com/in/tpsloots</a></p>
+        </div>
+        <a class="btn" href="#scan">Naar de zelfscan</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap"><a href="https://www.benable.nl">B.Enable</a> · Warmte Control Framework · Implementatiestappenplan · Doorlooptijden zijn indicatief en worden na de nulmeting op maat vastgesteld.</div>
+</footer>
+
+<script>
+(function(){
+  var PHASE_COLORS=["#2F6C8F","#3F7F8C","#8F8A3A","#C08A1E","#D4521C"];
+  var phases=[
+    {id:0,name:"Nulmeting",dur:"2–4 weken",lvl:"Inzicht in vertrekpunt",
+     goal:"Objectief vaststellen waar de organisatie staat en wat de eerste prioriteiten zijn.",
+     act:["Interviews met directie, finance, commercie, inkoop en operations (5–8 gesprekken)","Inventarisatie van rapportages, Excel-bestanden en bronsystemen","Beoordeling per laag op volwassenheid (0–4)","Een maandafsluiting doorlopen: doorlooptijd, handwerk, knelpunten","Huidige KPI's toetsen aan de KPI-bibliotheek"],
+     del:["Volwassenheidsscan per laag","Top 5 knelpunten met financiële of bestuurlijke impact","Stappenplan op maat met doorlooptijd en inzet","Advies over tooling passend bij omvang en IT-landschap"],
+     tools:["Interviews en workshops","Bestaande Excel-bestanden","Het demomodel als referentie"],
+     show:"Eén presentatie aan het MT met de scan per laag en het voorgestelde stappenplan.",
+     gate:"Het MT heeft het vertrekpunt en de prioriteiten vastgesteld."},
+    {id:1,name:"Fundament",dur:"0–3 maanden",lvl:"Naar niveau 1",
+     goal:"Betrouwbare cijfers en één gedeelde taal. De financiële basis op orde en een eerste KPI-set.",
+     act:["Definities vastleggen: warmtemarge, commerciële marge, inkoopmarge en kostenbijdrage","Eén management P&L, met commerciële marge en inkoopmarge apart","Grootboekrekeningen koppelen aan de management P&L","Vaste afsluitkalender met taken, eigenaren en deadlines","Maandelijkse energiebalans: ingekocht, geleverd en gefactureerd","Kernset van 8–10 KPI's kiezen en KPI-kaarten invullen"],
+     del:["Vastgestelde begrippenlijst en KPI-kaarten","Mappingtabel grootboek → management P&L","Afsluitkalender","Gestandaardiseerd maandrapport in Excel"],
+     tools:["Excel met Power Query voor het inlezen van exports","SharePoint of OneDrive als vaste plek voor bronbestanden"],
+     show:"Een maandrapport van 3–5 pagina's: P&L met afwijkingen, energiebalans en KPI's met stoplichten.",
+     gate:"De maand is drie keer op rij volgens de kalender afgesloten en het MT accepteert de cijfers als de waarheid."},
+    {id:2,name:"Structureren en zichtbaar maken",dur:"3–6 maanden",lvl:"Naar niveau 2",
+     goal:"Afwijkingen verklaren in drivers en de informatie interactief beschikbaar maken.",
+     act:["Eenvoudig datamodel met feiten (boekingen, volumes, aansluitingen) en dimensies","Standaard afwijkingsanalyse: volume-, prijs- en kostenbijdrage-effect","Eerste dashboards in Power BI, gebouwd op de bestanden uit fase 1","Eerste kwartaalforecast (Best Estimate) op basis van drivers","Begroting met dezelfde drivers en dimensies als de werkelijke cijfers","Controllers en managers trainen"],
+     del:["Gedocumenteerd datamodel","3–4 dashboards","Standaard afwijkingsanalyse","Eerste Best Estimate"],
+     tools:["Power BI Desktop voor model en dashboards","Power BI Service om te delen met het MT","Excel en Power Query voor datavoorbereiding"],
+     show:"Het MT kijkt in de business review naar het live dashboard en klikt door van totaal naar tariefcategorie, net of bron.",
+     gate:"De dashboards worden elke maand gebruikt in het MT en de afwijkingsanalyse hoort standaard bij de afsluiting."},
+    {id:3,name:"Automatiseren",dur:"6–12 maanden",lvl:"Naar niveau 3",
+     goal:"Handwerk eruit: sneller en betrouwbaarder rapporteren.",
+     act:["Data rechtstreeks uit financieel pakket, facturatie, CRM en meetdata","Eén centrale plek waar data samenkomt en wordt bewaard","Dashboards verversen automatisch","Automatische signalen bij ontbrekende meterstanden of ongemapte rekeningen","Rolling forecast 12–18 maanden vooruit","Autorisaties, documentatie en beheerafspraken met IT"],
+     del:["Geautomatiseerde datastroom van bron tot dashboard","Datakwaliteitsdashboard","Rolling forecast-model","Beheerhandboek"],
+     tools:["Power BI dataflows, een centrale database of Microsoft Fabric (afhankelijk van omvang)","Standaardkoppelingen of API's van de bronsystemen"],
+     show:"De afsluiting en rapportage zijn een aantal werkdagen sneller en het datakwaliteitsdashboard laat zien waar processen haperen.",
+     gate:"De maandrapportage komt tot stand zonder handmatige datastappen."},
+    {id:4,name:"Sturen en verbeteren",dur:"12–18 maanden",lvl:"Naar niveau 4",
+     goal:"Van rapporteren naar sturen: inzichten worden besluiten met een eigenaar en een effect.",
+     act:["Vaste business reviews met agenda, dashboard en actielijst","Elk besluit krijgt een eigenaar, deadline en verwacht financieel effect","Scenario's: tarieven, bronwisseling, nieuwe aansluitingen, investeringen","KPI's koppelen aan afdelingsdoelen","Het model inzetten voor de tariefonderbouwing","Jaarlijkse herijking van KPI's en volwassenheid"],
+     del:["Vastgestelde stuurcyclus met kalender","Actielijst in het dashboard","Scenariomodel","Jaarlijkse volwassenheidsscan"],
+     tools:["Power BI met een gekoppelde actielijst (SharePoint of Planner)","Scenariomodel in Excel of een planningstool"],
+     show:"Het MT-overleg draait om het dashboard en de actielijst; de financiële effecten van besluiten zijn over tijd te volgen.",
+     gate:"Besluiten worden gevolgd op hun financiële effect en de cyclus draait zonder externe hulp."}
+  ];
+  var layers=[
+    {name:"Financiële basis",q:"Klopt het?",d:["Cijfers uit losse Excel-bestanden, afsluiten zonder vaste kalender","Vaste afsluitkalender en één management P&L","Grootboekmapping en maandelijkse energiebalans","Data komt automatisch uit de bronsystemen","Snelle afsluiting met automatische controles"]},
+    {name:"Business drivers",q:"Waarom?",d:["Afwijkingen worden niet of alleen ad hoc verklaard","Afwijkingen in tekst verklaard, niet in cijfers","Standaard brug: volume, prijs en kostenbijdrage","Rolling forecast op basis van drivers","Scenario's standaard onderdeel van besluiten"]},
+    {name:"KPI's en prestaties",q:"Presteren we?",d:["Geen vaste KPI-set of eenduidige definities","Beperkte KPI-set in een Excel-overzicht","Vastgestelde KPI-kaarten en eerste dashboards","Dashboards verversen automatisch","KPI's gekoppeld aan doelen en eigenaren"]},
+    {name:"Sturing",q:"Wat gaan we doen?",d:["Geen vaste stuurcyclus","Maandelijks MT-overleg over de cijfers","Business review met afwijkingsanalyse","Business review met actielijst en Best Estimate","Besluiten gevolgd op financieel effect"]}
+  ];
+  var LV_COLORS=PHASE_COLORS;
+  var scores=[1,0,1,0];
+  var selPhase=1;
+
+  function el(tag,attrs,html){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==="style")e.setAttribute("style",attrs[k]);else e.setAttribute(k,attrs[k]);}if(html!=null)e.innerHTML=html;return e;}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+
+  function recPhase(){var m=Math.min.apply(null,scores);return Math.min(4,m+1);}
+
+  /* Pipeline */
+  var pipe=document.getElementById("pipe");
+  phases.forEach(function(p){
+    var b=el("button",{type:"button","class":"node",style:"--c:"+PHASE_COLORS[p.id],"data-p":p.id,"aria-label":"Fase "+p.id+": "+p.name});
+    b.innerHTML='<span class="dot">'+p.id+'</span><span class="t">'+esc(p.name)+'</span><span class="d">'+esc(p.dur)+'</span><span class="badge">jullie start</span>';
+    b.addEventListener("click",function(){selectPhase(p.id);document.getElementById("roadmap").scrollIntoView();});
+    pipe.appendChild(b);
+  });
+
+  /* Scan */
+  var layersBox=document.getElementById("layers");
+  layers.forEach(function(L,i){
+    var wrap=el("div",{"class":"layer"});
+    wrap.innerHTML='<div class="layer-top"><h3>Laag '+(i+1)+' · '+esc(L.name)+'</h3><span class="q">'+esc(L.q)+'</span></div>';
+    var row=el("div",{"class":"levels",role:"group","aria-label":"Niveau "+L.name});
+    for(var n=0;n<5;n++){
+      (function(n){
+        var b=el("button",{type:"button","class":"lv",id:"lv-"+i+"-"+n,"aria-pressed":"false",style:"--lvc:"+LV_COLORS[n],title:L.d[n]},String(n));
+        b.addEventListener("click",function(){scores[i]=n;renderScan();});
+        row.appendChild(b);
+      })(n);
+    }
+    wrap.appendChild(row);
+    wrap.appendChild(el("p",{"class":"lv-desc",id:"desc-"+i},""));
+    layersBox.appendChild(wrap);
+  });
+
+  function radar(){
+    var svg=document.getElementById("radar");
+    var cx=150,cy=125,R=90;
+    var ang=[-90,0,90,180];
+    var lbl=["1 Basis","2 Drivers","3 KPI's","4 Sturing"];
+    function pt(a,r){var t=a*Math.PI/180;return [cx+Math.cos(t)*r,cy+Math.sin(t)*r];}
+    var s="";
+    for(var k=1;k<=4;k++){var pts=ang.map(function(a){return pt(a,R*k/4).join(",");}).join(" ");s+='<polygon class="ring" points="'+pts+'"/>';}
+    ang.forEach(function(a){var p=pt(a,R);s+='<line class="ax" x1="'+cx+'" y1="'+cy+'" x2="'+p[0]+'" y2="'+p[1]+'"/>';});
+    s+='<polygon class="target" points="'+ang.map(function(a){return pt(a,R).join(",");}).join(" ")+'"/>';
+    var cur=ang.map(function(a,i){return pt(a,Math.max(scores[i],0.15)*R/4);});
+    s+='<polygon class="cur" points="'+cur.map(function(p){return p.join(",");}).join(" ")+'"/>';
+    cur.forEach(function(p){s+='<circle class="pt" cx="'+p[0]+'" cy="'+p[1]+'" r="4"/>';});
+    var lp=[[cx,cy-R-12,"middle"],[cx+R+8,cy+4,"start"],[cx,cy+R+20,"middle"],[cx-R-8,cy+4,"end"]];
+    lp.forEach(function(p,i){s+='<text x="'+p[0]+'" y="'+p[1]+'" text-anchor="'+p[2]+'">'+lbl[i]+' · '+scores[i]+'</text>';});
+    svg.innerHTML=s;
+  }
+
+  function renderScan(){
+    layers.forEach(function(L,i){
+      for(var n=0;n<5;n++){document.getElementById("lv-"+i+"-"+n).setAttribute("aria-pressed",n===scores[i]?"true":"false");}
+      document.getElementById("desc-"+i).textContent="Niveau "+scores[i]+": "+L.d[scores[i]];
+    });
+    radar();
+    var rp=recPhase();
+    var m=Math.min.apply(null,scores);
+    var focus=scores.indexOf(m);
+    var avg=scores.reduce(function(a,b){return a+b;},0)/4;
+    document.getElementById("advBig").textContent=(m>=4)?"Jullie sturen al volwassen":"Start bij fase "+rp+": "+phases[rp].name;
+    var t;
+    if(m>=4){t="Alle lagen staan op niveau 4. Een jaarlijkse herijking in fase 4 houdt het model scherp.";}
+    else{t="Gemiddeld niveau "+avg.toFixed(1).replace(".",",")+". Verbeteren begint bij de laagste laag die nog niet op orde is: laag "+(focus+1)+" ("+layers[focus].name.toLowerCase()+"). Een korte nulmeting (fase 0) bevestigt dit beeld.";}
+    document.getElementById("advText").textContent=t;
+    var prio=document.getElementById("advPrio");prio.innerHTML="";
+    var order=scores.map(function(s,i){return {s:s,i:i};}).filter(function(o){return o.s<4;}).sort(function(a,b){return a.s-b.s||a.i-b.i;}).slice(0,3);
+    order.forEach(function(o,k){
+      var next=layers[o.i].d[Math.min(4,o.s+1)];
+      prio.appendChild(el("li",null,'<span class="n">'+(k+1)+'</span><span><b>'+esc(layers[o.i].name)+'</b> naar niveau '+(o.s+1)+': '+esc(next.charAt(0).toLowerCase()+next.slice(1))+'</span>'));
+    });
+    document.querySelectorAll(".node").forEach(function(n){n.classList.toggle("rec",+n.dataset.p===rp && m<4);});
+    document.querySelectorAll(".tab").forEach(function(n){n.classList.toggle("is-rec",+n.dataset.p===rp && m<4);});
+  }
+
+  function scanText(){
+    var rp=recPhase();var m=Math.min.apply(null,scores);
+    var lines=["Zelfscan Warmte Control Framework",""];
+    layers.forEach(function(L,i){lines.push("Laag "+(i+1)+" "+L.name+": niveau "+scores[i]+" – "+L.d[scores[i]]);});
+    lines.push("");
+    lines.push(m>=4?"Advies: alle lagen op niveau 4, jaarlijkse herijking.":"Advies: start bij fase "+rp+" – "+phases[rp].name+" ("+phases[rp].dur+").");
+    return lines.join("\n");
+  }
+  document.getElementById("copyBtn").addEventListener("click",function(){
+    var txt=scanText();var btn=this;var fb=document.getElementById("copyFallback");
+    function fallback(){fb.style.display="block";fb.value=txt;fb.focus();fb.select();btn.textContent="Selecteer en kopieer de tekst";}
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){btn.textContent="Gekopieerd";setTimeout(function(){btn.textContent="Kopieer scanresultaat";},1800);},fallback);
+      }else fallback();
+    }catch(e){fallback();}
+  });
+  document.getElementById("toPhase").addEventListener("click",function(){selectPhase(recPhase());document.getElementById("roadmap").scrollIntoView();});
+
+  /* Roadmap */
+  var tabs=document.getElementById("tabs");
+  phases.forEach(function(p){
+    var b=el("button",{type:"button","class":"tab",role:"tab",id:"tab-"+p.id,"data-p":p.id,style:"--c:"+PHASE_COLORS[p.id],"aria-selected":"false","aria-controls":"phase"});
+    b.innerHTML='<span class="sw"></span>Fase '+p.id+' · '+esc(p.name)+' <span class="rec">← start</span>';
+    b.addEventListener("click",function(){selectPhase(p.id);});
+    tabs.appendChild(b);
+  });
+  function list(a){return "<ul>"+a.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+"</ul>";}
+  function selectPhase(id){
+    selPhase=id;var p=phases[id];var c=PHASE_COLORS[id];
+    document.querySelectorAll(".tab").forEach(function(t){t.setAttribute("aria-selected",+t.dataset.p===id?"true":"false");});
+    document.querySelectorAll(".node").forEach(function(t){t.setAttribute("aria-current",+t.dataset.p===id?"true":"false");});
+    var box=document.getElementById("phase");
+    box.style.setProperty("--c",c);
+    box.setAttribute("aria-labelledby","tab-"+id);
+    box.innerHTML='<div class="phase-head"><div style="display:grid;gap:6px;max-width:65ch"><span class="kicker">Fase '+id+'</span><h2>'+esc(p.name)+'</h2><p class="lead" style="font-size:1.02rem">'+esc(p.goal)+'</p></div><div class="meta"><span class="pill"><span class="sw" style="--c:'+c+'"></span>'+esc(p.dur)+'</span><span class="pill">'+esc(p.lvl)+'</span></div></div>'+
+      '<div class="phase-grid"><div class="blk"><h4>Wat we doen</h4>'+list(p.act)+'</div><div class="blk"><h4>Wat het oplevert</h4>'+list(p.del)+'</div><div class="blk"><h4>Tools</h4>'+list(p.tools)+'<h4 style="margin-top:10px">Zo wordt het zichtbaar</h4><p style="font-size:.95rem">'+esc(p.show)+'</p></div></div>'+
+      '<div class="gate"><span class="ic">'+(id<4?"Klaar voor fase "+(id+1)+" als":"Doel bereikt als")+'</span><span>'+esc(p.gate)+'</span></div>';
+  }
+
+  /* Tools */
+  var sizes=[{k:"klein",l:"Klein · < 10.000 aansluitingen"},{k:"middel",l:"Middel · 10.000–50.000"},{k:"groot",l:"Groot · > 50.000"}];
+  var curSize="klein";
+  var toolRows=function(s){
+    var store={klein:["Gedeelde map / SharePoint","Power BI dataflows op gestructureerde exports","Opschalen is meestal niet nodig"],
+               middel:["Gedeelde map / SharePoint","Centrale database (bijv. Azure SQL) of Microsoft Fabric","Geplande dataloads uit de bronsystemen"],
+               groot:["Centrale database","Datawarehouse of lakehouse (bijv. Microsoft Fabric)","Vaak naast een bestaand BI-platform van de organisatie"]}[s];
+    var plan={klein:["Excel driver-model","Excel driver-model","Volstaat bij een beperkt aantal scenario's"],
+              middel:["Excel driver-model","Excel of planningstool","Planningstool bij veel scenario's of gebruikers"],
+              groot:["Excel driver-model","Planningstool (FP&A-software)","Voor complexe consolidatie en veel gebruikers"]}[s];
+    return [
+      ["Data voorbereiden","Excel + Power Query","Power BI dataflows / Microsoft Fabric","Dezelfde Power Query-kennis in Excel en Power BI"],
+      ["Data opslaan",store[0],store[1],store[2]],
+      ["Rapporteren en visualiseren","Excel-maandrapport","Power BI","Logische keuze binnen Microsoft 365"],
+      ["Begroten en forecasten",plan[0],plan[1],plan[2]],
+      ["Actielijst en opvolging","Excel / Teams","Power BI + SharePoint-lijst of Planner","Eenvoud gaat boven functionaliteit"]
+    ];
+  };
+  var sizeBox=document.getElementById("size");
+  sizes.forEach(function(s){
+    var b=el("button",{type:"button","class":"seg","aria-pressed":s.k===curSize?"true":"false","data-k":s.k},esc(s.l));
+    b.addEventListener("click",function(){curSize=s.k;renderTools();});
+    sizeBox.appendChild(b);
+  });
+  function renderTools(){
+    document.querySelectorAll(".seg").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.k===curSize?"true":"false");});
+    document.getElementById("toolBody").innerHTML=toolRows(curSize).map(function(r){return "<tr><td><b>"+esc(r[0])+"</b></td><td>"+esc(r[1])+"</td><td><span class=\"arrow\">→</span> "+esc(r[2])+"</td><td>"+esc(r[3])+"</td></tr>";}).join("");
+  }
+
+  /* Pyramid */
+  var tiers=[
+    {n:"Strategisch",w:"40%",c:PHASE_COLORS[4],who:"RvC en aandeelhouder",form:"Kwartaalrapport (PDF of presentatie)",what:"EBITDA, kasstroom, investeringen, CO₂ vs doel en Best Estimate",freq:"Per kwartaal"},
+    {n:"Tactisch",w:"60%",c:PHASE_COLORS[3],who:"Directie en MT",form:"Dashboard en business review",what:"Kernset KPI's, afwijkingsanalyse en actielijst",freq:"Maandelijks"},
+    {n:"Operationeel",w:"80%",c:PHASE_COLORS[1],who:"Teamleiders",form:"Operationele dashboards",what:"Facturatie, debiteuren, klantcases en datakwaliteit",freq:"Wekelijks of dagelijks"},
+    {n:"Analytisch",w:"100%",c:PHASE_COLORS[0],who:"Controllers",form:"Datamodel en analyses",what:"Detail per aansluiting, tariefcategorie en bron",freq:"Op afroep"}
+  ];
+  var curTier=1;
+  var tierBox=document.getElementById("tiers");
+  tiers.forEach(function(t,i){
+    var b=el("button",{type:"button","class":"tier","aria-pressed":"false",style:"--w:"+t.w+";--c:"+t.c});
+    b.innerHTML='<span class="tl">'+esc(t.n)+'</span><span class="ts">'+esc(t.freq)+'</span>';
+    b.addEventListener("click",function(){curTier=i;renderTier();});
+    tierBox.appendChild(b);
+  });
+  function renderTier(){
+    tierBox.querySelectorAll(".tier").forEach(function(b,i){b.setAttribute("aria-pressed",i===curTier?"true":"false");});
+    var t=tiers[curTier];
+    document.getElementById("tierInfo").innerHTML='<span class="kicker">'+esc(t.n)+' niveau</span><p><b>Voor wie:</b> '+esc(t.who)+'</p><p><b>Vorm:</b> '+esc(t.form)+'</p><p><b>Inhoud:</b> '+esc(t.what)+'</p><p><b>Frequentie:</b> '+esc(t.freq)+'</p>';
+  }
+
+  /* Pitfalls */
+  var pits=[
+    ["Beginnen met het dashboard","Mooie plaatjes op onbetrouwbare cijfers.","Fase 1 niet overslaan."],
+    ["Te veel KPI's","Niemand stuurt nog ergens echt op.","Een kernset van 10–15; de rest als verdieping."],
+    ["Definities niet vastgesteld","Het overleg gaat over de cijfers in plaats van over besluiten.","Het MT stelt de definities formeel vast."],
+    ["Alles tegelijk automatiseren","Een lang traject zonder zichtbaar resultaat.","Eerst handmatig werkend, dan automatiseren."],
+    ["Kennis bij één persoon","De organisatie is kwetsbaar na afloop.","Kennisoverdracht en documentatie in elke fase."],
+    ["Toolkeuze zonder IT","Problemen met beheer en beveiliging.","IT vanaf de nulmeting betrekken."]
+  ];
+  document.getElementById("pits").innerHTML=pits.map(function(p){return '<div class="card pit"><h3>'+esc(p[0])+'</h3><p>'+esc(p[1])+'</p><p class="fix"><b>Zo voorkomen we het:</b> '+esc(p[2])+'</p></div>';}).join("");
+
+  /* Offer */
+  var mods=[
+    ["Controlling Quick Scan","Vaste prijs, 2–4 weken","Nulmeting, knelpunten en een stappenplan op maat."],
+    ["Fundament op orde","Project","Definities, management P&L, afsluitkalender en Excel-maandrapport."],
+    ["Dashboards en driveranalyse","Project","Datamodel, afwijkingsanalyse en de standaarddashboards in Power BI."],
+    ["Automatisering","Project, samen met een BI-/IT-partner","Koppelingen, centrale data en rolling forecast."],
+    ["Sturing en begeleiding","Abonnement","Kwartaalreview, jaarlijkse scan en updates van het framework."]
+  ];
+  document.getElementById("offer").innerHTML=mods.map(function(m,i){return '<div class="card mod" style="--c:'+PHASE_COLORS[i]+'"><span class="k">Fase '+i+'</span><h3>'+esc(m[0])+'</h3><span class="pill">'+esc(m[1])+'</span><p>'+esc(m[2])+'</p></div>';}).join("");
+
+  renderScan();selectPhase(recPhase());renderTools();renderTier();
+})();
+</script>
+</body>
+</html>
