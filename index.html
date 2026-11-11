@@ -77,7 +77,10 @@ header.hero{padding:56px 0 40px}
 .node .t{font-family:var(--display);font-weight:700;font-size:1rem}
 .node .d{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
 .node .badge{font-family:var(--mono);font-size:.68rem;padding:2px 7px;border-radius:999px;background:var(--hot);color:#fff;visibility:hidden}
-.node.rec .badge{visibility:visible}
+.node.start .badge,.node.rec .badge{visibility:visible}
+.node.rec .badge{background:transparent;color:var(--hot);border:1px solid var(--hot)}
+.example:empty{display:none}
+.example{display:inline-block;font-family:var(--mono);font-size:.72rem;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--muted);margin-left:6px}
 
 /* Cards */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
@@ -122,7 +125,7 @@ header.hero{padding:56px 0 40px}
 .tab .sw{width:10px;height:10px;border-radius:50%;background:var(--c)}
 .tab[aria-selected="true"]{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
 .tab .rec{font-family:var(--mono);font-size:.68rem;color:var(--hot);display:none}
-.tab.is-rec .rec{display:inline}
+.tab.is-rec .rec,.tab.is-start .rec{display:inline}
 .phase{border-top:6px solid var(--c)}
 .phase-head{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:18px}
 .phase-head .meta{display:flex;gap:8px;flex-wrap:wrap}
@@ -229,7 +232,7 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
         <aside class="result card" aria-live="polite">
           <div class="radar-box"><svg class="radar" id="radar" viewBox="0 0 300 260" width="100%" style="max-width:330px" role="img" aria-label="Volwassenheid per laag"></svg></div>
           <div class="advice">
-            <span class="kicker">Advies</span>
+            <span class="kicker">Advies <span class="example" id="exampleTag"></span></span>
             <div class="big" id="advBig"></div>
             <p id="advText" class="note"></p>
             <ol class="prio" id="advPrio"></ol>
@@ -244,7 +247,7 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
             <a class="btn hot" id="mailBtn" href="mailto:tom@benable.nl">Stuur mijn uitkomst naar Tom</a>
             <p class="note">Opent je e-mailprogramma met de uitkomst al ingevuld. Werkt dat niet? <button class="linkbtn" id="copyBtn" type="button">Kopieer de uitkomst</button> en mail naar tom@benable.nl.</p>
           </div>
-          <button class="linkbtn" id="toPhase" type="button" style="justify-self:start">Bekijk de startfase in het stappenplan →</button>
+          <button class="linkbtn" id="toPhase" type="button" style="justify-self:start">Bekijk jullie focusfase in het stappenplan →</button>
           <textarea id="copyFallback" aria-label="Scanresultaat om te kopiëren" readonly></textarea>
           <p class="note"><span class="pill"><span class="sw" style="--c:var(--cold)"></span>huidig</span> <span class="pill"><span class="sw" style="--c:var(--hot)"></span>doelbeeld (niveau 4)</span></p>
         </aside>
@@ -352,12 +355,12 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
 <script>
 (function(){
   var SECTORS=[
-    {k:"algemeen",l:"Algemeen",orgHead:"een organisatie die",orgSmall:"een middelgrote organisatie",org:"organisatie",conn:"klanten",connSing:"klant",margin:"brutomarge",cost:"kostprijs",bal:"volumebalans: ingekocht, geleverd en gefactureerd",drill:"productgroep, regio of klantsegment",scen:"prijswijzigingen, nieuwe klanten, kostenbesparingen en investeringen",dash5t:"Duurzaamheid en volumes",dash5d:"Volumebalans, duurzaamheidsdoelen en afwijkingen in volumes"},
-    {k:"warmte",l:"Warmte",orgHead:"een warmtebedrijf dat",orgSmall:"een kleiner warmtebedrijf",org:"warmtebedrijf",conn:"aansluitingen",connSing:"aansluiting",margin:"warmtemarge",cost:"kostenbijdrage",bal:"energiebalans: ingekochte, geleverde en gefactureerde GJ",drill:"tariefcategorie, net of bron",scen:"tarieven, bronwisseling, nieuwe aansluitingen en investeringen",dash5t:"Duurzaamheid en energiebalans",dash5d:"Bronmix, CO₂-intensiteit, netverlies en onbalans"},
-    {k:"energie",l:"Energielevering",orgHead:"een energieleverancier die",orgSmall:"een kleinere energieleverancier",org:"energieleverancier",conn:"aansluitingen",connSing:"aansluiting",margin:"leveringsmarge",cost:"kostprijs",bal:"energiebalans: ingekochte, geleverde en gefactureerde MWh",drill:"product, klantsegment of kanaal",scen:"tarieven, inkoopstrategie, klantgroei en investeringen",dash5t:"Inkoop en energiebalans",dash5d:"Inkoopposities, onbalanskosten, aandeel groene levering en allocatieverschillen"},
-    {k:"water",l:"Drinkwater",orgHead:"een drinkwaterbedrijf dat",orgSmall:"een kleiner drinkwaterbedrijf",org:"drinkwaterbedrijf",conn:"aansluitingen",connSing:"aansluiting",margin:"brutomarge",cost:"kostprijs",bal:"waterbalans: geproduceerde, geleverde en gefactureerde m³",drill:"regio, productielocatie of klantsegment",scen:"tarieven, productiecapaciteit, leidingvervanging en investeringen",dash5t:"Duurzaamheid en waterbalans",dash5d:"Energieverbruik per m³, waterverlies, CO₂-uitstoot en onverklaarde verschillen"},
-    {k:"glasvezel",l:"Glasvezel / telecom",orgHead:"een glasvezelaanbieder die",orgSmall:"een kleinere glasvezelaanbieder",org:"glasvezelaanbieder",conn:"aansluitingen",connSing:"aansluiting",margin:"brutomarge",cost:"kostprijs",bal:"klantbalans: opgeleverde, actieve en gefactureerde aansluitingen",drill:"netwerkgebied, product of kanaal",scen:"prijzen, uitrol nieuwe gebieden, activatiegraad en investeringen",dash5t:"Netwerk en klantbalans",dash5d:"Activatiegraad, opzeggingen, storingen en verschillen tussen actief en gefactureerd"},
-    {k:"laadinfra",l:"Laadinfrastructuur",orgHead:"een laadpaalexploitant die",orgSmall:"een kleinere laadpaalexploitant",org:"laadpaalexploitant",conn:"laadpunten",connSing:"laadpunt",margin:"laadmarge",cost:"kostprijs",bal:"energiebalans: ingekochte, geladen en gefactureerde kWh",drill:"locatie, laadpunttype of klantsegment",scen:"tarieven, nieuwe locaties, bezettingsgraad en investeringen",dash5t:"Bezetting en energiebalans",dash5d:"Bezettingsgraad, beschikbaarheid, groene stroom en energieverschillen"}
+    {k:"algemeen",balShort:"volumebalans",l:"Algemeen",orgHead:"een organisatie die",orgSmall:"een middelgrote organisatie",org:"organisatie",conn:"klanten",connSing:"klant",margin:"brutomarge",cost:"kostprijs",bal:"volumebalans: ingekocht, geleverd en gefactureerd",drill:"productgroep, regio of klantsegment",scen:"prijswijzigingen, nieuwe klanten, kostenbesparingen en investeringen",dash5t:"Duurzaamheid en volumes",dash5d:"Volumebalans, duurzaamheidsdoelen en afwijkingen in volumes"},
+    {k:"warmte",balShort:"energiebalans",l:"Warmte",orgHead:"een warmtebedrijf dat",orgSmall:"een kleiner warmtebedrijf",org:"warmtebedrijf",conn:"aansluitingen",connSing:"aansluiting",margin:"warmtemarge",cost:"kostenbijdrage",bal:"energiebalans: ingekochte, geleverde en gefactureerde GJ",drill:"tariefcategorie, net of bron",scen:"tarieven, bronwisseling, nieuwe aansluitingen en investeringen",dash5t:"Duurzaamheid en energiebalans",dash5d:"Bronmix, CO₂-intensiteit, netverlies en onbalans"},
+    {k:"energie",balShort:"energiebalans",l:"Energielevering",orgHead:"een energieleverancier die",orgSmall:"een kleinere energieleverancier",org:"energieleverancier",conn:"aansluitingen",connSing:"aansluiting",margin:"leveringsmarge",cost:"kostprijs",bal:"energiebalans: ingekochte, geleverde en gefactureerde MWh",drill:"product, klantsegment of kanaal",scen:"tarieven, inkoopstrategie, klantgroei en investeringen",dash5t:"Inkoop en energiebalans",dash5d:"Inkoopposities, onbalanskosten, aandeel groene levering en allocatieverschillen"},
+    {k:"water",balShort:"waterbalans",l:"Drinkwater",orgHead:"een drinkwaterbedrijf dat",orgSmall:"een kleiner drinkwaterbedrijf",org:"drinkwaterbedrijf",conn:"aansluitingen",connSing:"aansluiting",margin:"brutomarge",cost:"kostprijs",bal:"waterbalans: geproduceerde, geleverde en gefactureerde m³",drill:"regio, productielocatie of klantsegment",scen:"tarieven, productiecapaciteit, leidingvervanging en investeringen",dash5t:"Duurzaamheid en waterbalans",dash5d:"Energieverbruik per m³, waterverlies, CO₂-uitstoot en onverklaarde verschillen"},
+    {k:"glasvezel",balShort:"klantbalans",l:"Glasvezel / telecom",orgHead:"een glasvezelaanbieder die",orgSmall:"een kleinere glasvezelaanbieder",org:"glasvezelaanbieder",conn:"aansluitingen",connSing:"aansluiting",margin:"brutomarge",cost:"kostprijs",bal:"klantbalans: opgeleverde, actieve en gefactureerde aansluitingen",drill:"netwerkgebied, product of kanaal",scen:"prijzen, uitrol nieuwe gebieden, activatiegraad en investeringen",dash5t:"Netwerk en klantbalans",dash5d:"Activatiegraad, opzeggingen, storingen en verschillen tussen actief en gefactureerd"},
+    {k:"laadinfra",balShort:"energiebalans",l:"Laadinfrastructuur",orgHead:"een laadpaalexploitant die",orgSmall:"een kleinere laadpaalexploitant",org:"laadpaalexploitant",conn:"laadpunten",connSing:"laadpunt",margin:"laadmarge",cost:"kostprijs",bal:"energiebalans: ingekochte, geladen en gefactureerde kWh",drill:"locatie, laadpunttype of klantsegment",scen:"tarieven, nieuwe locaties, bezettingsgraad en investeringen",dash5t:"Bezetting en energiebalans",dash5d:"Bezettingsgraad, beschikbaarheid, groene stroom en energieverschillen"}
   ];
   var T=SECTORS[0];
   function fmt(str){return String(str).replace(/\{(\w+)\}/g,function(m,k){return T[k]!=null?T[k]:m;});}
@@ -401,7 +404,7 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
      gate:"Besluiten worden gevolgd op hun financiële effect en de cyclus draait zonder externe hulp."}
   ];
   var layers=[
-    {name:"Financiële basis",q:"Klopt het?",d:["Cijfers uit losse Excel-bestanden, afsluiten zonder vaste kalender","Vaste afsluitkalender en één management P&L","Grootboekmapping en maandelijkse energiebalans","Data komt automatisch uit de bronsystemen","Snelle afsluiting met automatische controles"]},
+    {name:"Financiële basis",q:"Klopt het?",d:["Cijfers uit losse Excel-bestanden, afsluiten zonder vaste kalender","Vaste afsluitkalender en één management P&L","Grootboekmapping en maandelijkse {balShort}","Data komt automatisch uit de bronsystemen","Snelle afsluiting met automatische controles"]},
     {name:"Business drivers",q:"Waarom?",d:["Afwijkingen worden niet of alleen ad hoc verklaard","Afwijkingen in tekst verklaard, niet in cijfers","Standaard brug: volume, prijs en {cost}","Rolling forecast op basis van drivers","Scenario's standaard onderdeel van besluiten"]},
     {name:"KPI's en prestaties",q:"Presteren we?",d:["Geen vaste KPI-set of eenduidige definities","Beperkte KPI-set in een Excel-overzicht","Vastgestelde KPI-kaarten en eerste dashboards","Dashboards verversen automatisch","KPI's gekoppeld aan doelen en eigenaren"]},
     {name:"Sturing",q:"Wat gaan we doen?",d:["Geen vaste stuurcyclus","Maandelijks MT-overleg over de cijfers","Business review met afwijkingsanalyse","Business review met actielijst en Best Estimate","Besluiten gevolgd op financieel effect"]}
@@ -409,6 +412,7 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
   var LV_COLORS=PHASE_COLORS;
   var scores=[1,0,1,0];
   var selPhase=1;
+  var touched=false;
 
   function el(tag,attrs,html){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==="style")e.setAttribute("style",attrs[k]);else e.setAttribute(k,attrs[k]);}if(html!=null)e.innerHTML=html;return e;}
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
@@ -419,7 +423,7 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
   var pipe=document.getElementById("pipe");
   phases.forEach(function(p){
     var b=el("button",{type:"button","class":"node",style:"--c:"+PHASE_COLORS[p.id],"data-p":p.id,"aria-label":"Fase "+p.id+": "+p.name});
-    b.innerHTML='<span class="dot">'+p.id+'</span><span class="t">'+esc(p.name)+'</span><span class="d">'+esc(p.dur)+'</span><span class="badge">jullie start</span>';
+    b.innerHTML='<span class="dot">'+p.id+'</span><span class="t">'+esc(p.name)+'</span><span class="d">'+esc(p.dur)+'</span><span class="badge">'+(p.id===0?'jullie start':'daarna: focus')+'</span>';
     b.addEventListener("click",function(){selectPhase(p.id);document.getElementById("roadmap").scrollIntoView();});
     pipe.appendChild(b);
   });
@@ -433,7 +437,7 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
     for(var n=0;n<5;n++){
       (function(n){
         var b=el("button",{type:"button","class":"lv",id:"lv-"+i+"-"+n,"aria-pressed":"false",style:"--lvc:"+LV_COLORS[n],title:L.d[n]},String(n));
-        b.addEventListener("click",function(){scores[i]=n;renderScan();});
+        b.addEventListener("click",function(){scores[i]=n;touched=true;renderScan();});
         row.appendChild(b);
       })(n);
     }
@@ -470,10 +474,11 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
     var m=Math.min.apply(null,scores);
     var focus=scores.indexOf(m);
     var avg=scores.reduce(function(a,b){return a+b;},0)/4;
-    document.getElementById("advBig").textContent=(m>=4)?"Jullie sturen al volwassen":"Start bij fase "+rp+": "+phases[rp].name;
+    document.getElementById("exampleTag").textContent=touched?"":"Voorbeeld: "+T.orgSmall;
+    document.getElementById("advBig").textContent=(m>=4)?"Jullie sturen al volwassen":"Jullie focus: fase "+rp+", "+phases[rp].name;
     var t;
     if(m>=4){t="Alle lagen staan op niveau 4. Een jaarlijkse herijking in fase 4 houdt het model scherp.";}
-    else{t="Gemiddeld niveau "+avg.toFixed(1).replace(".",",")+". Verbeteren begint bij de laagste laag die nog niet op orde is: laag "+(focus+1)+" ("+layers[focus].name.toLowerCase()+"). Een korte nulmeting (fase 0) bevestigt dit beeld.";}
+    else{t="Begin met een nulmeting (fase 0, 2–4 weken) om dit beeld te bevestigen en de prioriteiten vast te stellen. De grootste winst zit daarna in fase "+rp+": "+phases[rp].name+". Gemiddeld niveau "+avg.toFixed(1).replace(".",",")+"; verbeteren begint bij de laagste laag die nog niet op orde is: laag "+(focus+1)+" ("+layers[focus].name.toLowerCase()+").";}
     document.getElementById("advText").textContent=t;
     var prio=document.getElementById("advPrio");prio.innerHTML="";
     var order=scores.map(function(s,i){return {s:s,i:i};}).filter(function(o){return o.s<4;}).sort(function(a,b){return a.s-b.s||a.i-b.i;}).slice(0,3);
@@ -481,8 +486,8 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
       var next=fmt(layers[o.i].d[Math.min(4,o.s+1)]);
       prio.appendChild(el("li",null,'<span class="n">'+(k+1)+'</span><span><b>'+esc(layers[o.i].name)+'</b> naar niveau '+(o.s+1)+': '+esc(next.charAt(0).toLowerCase()+next.slice(1))+'</span>'));
     });
-    document.querySelectorAll(".node").forEach(function(n){n.classList.toggle("rec",+n.dataset.p===rp && m<4);});
-    document.querySelectorAll(".tab").forEach(function(n){n.classList.toggle("is-rec",+n.dataset.p===rp && m<4);});
+    document.querySelectorAll(".node").forEach(function(n){var p=+n.dataset.p;n.classList.toggle("start",p===0);n.classList.toggle("rec",p===rp && p!==0 && m<4);});
+    document.querySelectorAll(".tab").forEach(function(n){var p=+n.dataset.p;n.classList.toggle("is-start",p===0);n.classList.toggle("is-rec",p===rp && p!==0 && m<4);});
     if(document.getElementById("mailBtn"))updateMail();
   }
 
@@ -494,10 +499,11 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
     if(nm)lines.push("Naam: "+nm);
     if(og)lines.push("Organisatie: "+og);
     lines.push("Sector: "+T.l);
+    if(!touched)lines.push("(Let op: dit is nog het ingevulde voorbeeld)");
     lines.push("");
     layers.forEach(function(L,i){lines.push("Laag "+(i+1)+" "+L.name+": niveau "+scores[i]+" – "+fmt(L.d[scores[i]]));});
     lines.push("");
-    lines.push(m>=4?"Advies: alle lagen op niveau 4, jaarlijkse herijking.":"Advies: start bij fase "+rp+" – "+phases[rp].name+" ("+phases[rp].dur+").");
+    lines.push(m>=4?"Advies: alle lagen op niveau 4, jaarlijkse herijking.":"Advies: start met een nulmeting (fase 0, 2–4 weken); daarna focus op fase "+rp+" – "+phases[rp].name+" ("+phases[rp].dur+").");
     return lines.join("\n");
   }
   function updateMail(){
@@ -522,7 +528,7 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
   var tabs=document.getElementById("tabs");
   phases.forEach(function(p){
     var b=el("button",{type:"button","class":"tab",role:"tab",id:"tab-"+p.id,"data-p":p.id,style:"--c:"+PHASE_COLORS[p.id],"aria-selected":"false","aria-controls":"phase"});
-    b.innerHTML='<span class="sw"></span>Fase '+p.id+' · '+esc(p.name)+' <span class="rec">← start</span>';
+    b.innerHTML='<span class="sw"></span>Fase '+p.id+' · '+esc(p.name)+' <span class="rec">'+(p.id===0?'← start':'← focus')+'</span>';
     b.addEventListener("click",function(){selectPhase(p.id);});
     tabs.appendChild(b);
   });
