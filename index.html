@@ -363,47 +363,49 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
   var phases=[
     {id:0,name:"Snelle verbeteringen",dur:"0–3 maanden",per:"0–3 maanden",lvl:"Naar niveau 1",sub:"Nulmeting en fundament",
      goal:"Eerst inzicht in het vertrekpunt, daarna betrouwbare cijfers en één gedeelde taal: de financiële basis op orde en een eerste KPI-set.",
-     act:["Nulmeting in de eerste 2–4 weken: interviews met directie, finance, commercie, inkoop en operations (5–8 gesprekken)","Rapportages, Excel-bestanden en bronsystemen inventariseren en een maandafsluiting doorlopen","Elke laag beoordelen op volwassenheid (0–4) en de top 5 knelpunten bepalen","Definities vastleggen: {defs}","Eén management P&L, met de marges per waardestroom apart, en de grootboekrekeningen daaraan koppelen","Vaste afsluitkalender met taken, eigenaren en deadlines","Maandelijkse {bal}","Kernset van 8–10 KPI's kiezen en KPI-kaarten invullen, met een eigenaar per KPI"],
+     act:["Nulmeting in de eerste 2–4 weken: interviews met directie, finance, commercie, inkoop en operations (5–8 gesprekken)","Rapportages, Excel-bestanden en bronsystemen inventariseren en een maandafsluiting doorlopen","Elke laag beoordelen op volwassenheid (0–4) en de top 5 knelpunten bepalen","Definities vastleggen: {defs}","Eén management P&L, met de marges per waardestroom apart, en de grootboekrekeningen daaraan koppelen","Vaste afsluitkalender met taken, eigenaren en deadlines","Maandelijkse {bal}","Kernset van 8–10 KPI's kiezen (groeiend naar 10–15) en KPI-kaarten invullen, met een eigenaar per KPI","Vaste business review met agenda, actielijst en besluitenlijst, binnen een vastgestelde stuurcyclus"],
      del:["Volwassenheidsscan per laag en een stappenplan op maat","Vastgestelde begrippenlijst en KPI-kaarten","Mappingtabel grootboek → management P&L en afsluitkalender","Gestandaardiseerd maandrapport in Excel"],
      tools:["Interviews en workshops","Excel met Power Query voor het inlezen van exports","SharePoint of OneDrive als vaste plek voor bronbestanden","Het demomodel als referentie"],
      show:"Een presentatie aan het MT met de scan per laag, daarna een maandrapport van 3–5 pagina's: P&L met afwijkingen, {balShort} en KPI's met stoplichten.",
      gate:"Het MT heeft het vertrekpunt en de prioriteiten vastgesteld, de maand is drie keer op rij volgens de kalender afgesloten en het MT accepteert de cijfers als de waarheid."},
     {id:1,name:"Basis op orde",dur:"3–9 maanden",per:"3–9 maanden",lvl:"Naar niveau 2",sub:"Structureren en zichtbaar maken",
      goal:"Afwijkingen verklaren in drivers, de informatie interactief beschikbaar maken en de eerste handmatige stappen vervangen.",
-     act:["Eenvoudig datamodel met feiten (boekingen, volumes, {conn}) en dimensies","Standaard afwijkingsanalyse: volume-, prijs- en {cost}-effect","Eerste dashboards in Power BI, gebouwd op de bestanden uit fase 1","Eerste kwartaalforecast (Best Estimate) op basis van drivers","Begroting met dezelfde drivers en dimensies als de werkelijke cijfers","Eerste koppelingen met het financiële pakket in plaats van handmatige exports","Controllers en managers trainen"],
+     act:["Eenvoudig datamodel met feiten (boekingen, volumes, {conn}) en dimensies","Standaard afwijkingsanalyse: volume-, prijs- en {cost}-effect","Eerste dashboards in Power BI, gebouwd op de bestanden uit fase 1","Eerste kwartaalforecast (Best Estimate) op basis van drivers","Begroting met dezelfde drivers en dimensies als de werkelijke cijfers","Eerste koppelingen met het financiële pakket in plaats van handmatige exports","Opvolging van acties als vast agendapunt en een vastgestelde bevoegdhedenmatrix","Controllers en managers trainen"],
      del:["Gedocumenteerd datamodel","3–4 dashboards","Standaard afwijkingsanalyse","Eerste Best Estimate"],
      tools:["Power BI Desktop voor model en dashboards","Power BI Service om te delen met het MT","Excel en Power Query voor datavoorbereiding"],
      show:"Het MT kijkt in de business review naar het live dashboard en klikt door van totaal naar {drill}.",
      gate:"De dashboards worden elke maand gebruikt in het MT en de afwijkingsanalyse hoort standaard bij de afsluiting."},
     {id:2,name:"Doorontwikkeling",dur:"9–18 maanden",per:"9–18 maanden",lvl:"Naar niveau 3 en 4",sub:"Automatiseren en sturen",
      goal:"Eerst het handwerk eruit, dan van rapporteren naar sturen: inzichten worden besluiten met een eigenaar en een effect.",
-     act:["Data rechtstreeks uit financieel pakket, facturatie, CRM en operationele systemen, op één centrale plek","Dashboards verversen automatisch, met signalen bij ontbrekende gegevens of ongemapte rekeningen","Rolling forecast 12–18 maanden vooruit","Autorisaties, documentatie en beheerafspraken met IT","Vaste business reviews met agenda, dashboard en actielijst; elk besluit krijgt een eigenaar, deadline en verwacht financieel effect","Scenario's: {scen}","KPI's koppelen aan afdelingsdoelen en waar passend aan beloning","Jaarlijkse herijking van KPI's en volwassenheid"],
+     act:["Data rechtstreeks uit financieel pakket, facturatie, CRM en operationele systemen, op één centrale plek","Dashboards verversen automatisch, met signalen bij ontbrekende gegevens of ongemapte rekeningen","Rolling forecast 12–18 maanden vooruit","Autorisaties, documentatie en beheerafspraken met IT","De business review stuurt op dashboard en forecast, met drempels voor actie; besluiten worden gevolgd op hun financiële effect","Scenario's: {scen}","KPI's koppelen aan afdelingsdoelen en waar passend aan beloning","Jaarlijkse herijking van KPI's en volwassenheid"],
      del:["Geautomatiseerde datastroom en datakwaliteitsdashboard","Rolling forecast en scenariomodel","Vastgestelde stuurcyclus met actielijst","Beheerhandboek en jaarlijkse volwassenheidsscan"],
      tools:["Power BI dataflows, een centrale database of Microsoft Fabric (afhankelijk van omvang)","Standaardkoppelingen of API's van de bronsystemen","Actielijst in SharePoint of Planner; scenariomodel in Excel of een planningstool"],
      show:"De afsluiting is een aantal werkdagen sneller en het MT-overleg draait om het dashboard en de actielijst; de financiële effecten van besluiten zijn over tijd te volgen.",
      gate:"De maandrapportage komt zonder handmatige datastappen tot stand, besluiten worden gevolgd op hun financiële effect en de cyclus draait zonder externe hulp."}
   ];
   var layers=[
-    {name:"Financiële basis",q:"Klopt het?",d:["Cijfers uit losse Excel-bestanden, afsluiten zonder vaste kalender","Vaste afsluitkalender en één management P&L","Grootboekmapping en maandelijkse {balShort}","Data komt automatisch uit de bronsystemen","Snelle afsluiting met automatische controles"]},
-    {name:"Business drivers",q:"Waarom?",d:["Afwijkingen worden niet of alleen ad hoc verklaard","Afwijkingen in tekst verklaard, niet in cijfers","Standaard brug: volume, prijs en {cost}","Rolling forecast op basis van drivers","Scenario's standaard onderdeel van besluiten"]},
+    {name:"Financiële basis",q:"Klopt het?",d:["Cijfers uit losse Excel-bestanden, afsluiten zonder vaste kalender","Vaste afsluitkalender, één management P&L met grootboekmapping en een maandelijkse {balShort}","Reconciliaties maandelijks afgetekend, functiescheiding en één bron per gegeven","Data komt automatisch uit de bronsystemen","Snelle afsluiting met automatische controles"]},
+    {name:"Business drivers",q:"Waarom?",d:["Afwijkingen worden niet of alleen ad hoc verklaard","Afwijkingen in tekst verklaard, niet in cijfers","Standaard brug in volume, prijs en {cost}, en een Best Estimate per kwartaal","Rolling forecast op basis van drivers","Scenario's standaard onderdeel van besluiten"]},
     {name:"KPI's en prestaties",q:"Presteren we?",d:["Geen vaste KPI-set of eenduidige definities","Beperkte KPI-set in een Excel-overzicht","Vastgestelde KPI-kaarten en eerste dashboards","Dashboards verversen automatisch","KPI's gekoppeld aan doelen, eigenaren en beloning"]},
-    {name:"Sturing",q:"Wat gaan we doen?",d:["Geen vaste stuurcyclus","Maandelijks MT-overleg over de cijfers","Business review met afwijkingsanalyse","Business review met actielijst en Best Estimate","Besluiten gevolgd op financieel effect"]}
+    {name:"Sturing",q:"Wat gaan we doen?",d:["Geen vaste stuurcyclus","Vaste business review met agenda, actielijst en besluitenlijst","Opvolging van acties is een vast agendapunt; bevoegdheden zijn vastgesteld","Business review stuurt op de forecast, met drempels voor actie","Besluiten gevolgd op financieel effect"]}
   ];
   /* Standaardacties per laag: wat nodig is om niveau n te halen. Niveau 1 hoort bij fase 1, niveau 2 bij fase 2, niveau 3 en 4 bij fase 3. */
+  /* Standaardacties per laag, getoetst aan A10.1a (14-11-2026). [niveau, actie, eigenaar, prioriteit, directiebesluit]
+     Niveau 1 hoort bij fase 1, niveau 2 bij fase 2, niveau 3 en 4 bij fase 3. */
   var STD=[
-    [[1,"Definities en begrippenlijst laten vaststellen door de directie","Directie","Hoog"],[1,"Vaste afsluitkalender met eigenaren invoeren","Financial control","Hoog"],[1,"Eén management P&L opstellen","Financial control","Hoog"],
-     [2,"Grootboekmapping naar management P&L opstellen","Financial control","Hoog"],[2,"Maandelijkse {balShort} invoeren","Financial control","Midden"],
-     [3,"Koppelingen met bronsystemen realiseren","IT","Midden"],[4,"Afsluiting versnellen met automatische controles","Financial control","Laag"]],
-    [[1,"Afwijkingen maandelijks toelichten in een vaste vorm","Business control","Midden"],
-     [2,"Standaard afwijkingsanalyse in volume, prijs en {cost}","Business control","Hoog"],[2,"Begroting opbouwen met dezelfde drivers als de werkelijke cijfers","Business control","Midden"],
-     [3,"Rolling forecast opzetten","Business control","Midden"],[4,"Scenario's standaard onderdeel maken van besluiten","Business control","Midden"]],
-    [[1,"Kernset van KPI-kaarten opstellen","Business control","Hoog"],[1,"Eigenaar per KPI vaststellen","Directie","Midden"],
-     [2,"Eerste dashboards bouwen","Business control","Hoog"],
-     [3,"Dashboard automatisch vullen uit één bron","IT","Midden"],[4,"KPI's koppelen aan doelen, eigenaren en beloning","Directie","Midden"]],
-    [[1,"Maandelijks MT-overleg over de cijfers invoeren","Directie","Hoog"],
-     [2,"Business review met vaste agenda en afwijkingsanalyse invoeren","Directie","Hoog"],
-     [3,"Actielijst met eigenaar, deadline en financieel effect invoeren","Directie","Hoog"],
-     [4,"Opvolging en effectmeting van besluiten borgen","Directie","Midden"]]
+    [[1,"Definities en begrippenlijst laten vaststellen door de directie","Directie","Hoog",1],[1,"Afsluitkalender met doelwerkdag invoeren en bewaken","Financial control","Hoog",0],[1,"Eén management P&L opstellen","Financial control","Hoog",0],[1,"Mappingtabel grootboek → management P&L opstellen","Financial control","Hoog",0],[1,"Maandelijkse {balShort} invoeren","Financial control","Midden",0],
+     [2,"Reconciliatieschema met eigenaren en aftekening opstellen","Financial control","Hoog",0],[2,"Functiescheiding en vier-ogenprincipe inrichten","Financial control","Midden",0],[2,"Bronnen en koppelingen beschrijven en één bron per gegeven afspreken","IT / finance","Midden",0],
+     [3,"Koppelingen met bronsystemen realiseren","IT","Midden",1],[4,"Afsluiting versnellen met automatische controles","Financial control","Laag",0]],
+    [[1,"Afwijkingen maandelijks toelichten in een vaste vorm","Business control","Midden",0],
+     [2,"Standaard afwijkingsanalyse invoeren in de maandrapportage (volume, prijs, {cost})","Business control","Hoog",0],[2,"Best Estimate per kwartaal invoeren","Business control","Hoog",0],[2,"Begroting opbouwen met dezelfde drivers als de werkelijke cijfers","Business control","Midden",0],
+     [3,"Rolling forecast opzetten","Business control","Midden",0],[4,"Scenario's standaard onderdeel maken van besluiten","Business control","Midden",0]],
+    [[1,"Kernset van KPI's vaststellen met de directie (start met 8–10, groei naar 10–15)","Directie","Hoog",1],[1,"KPI-kaarten opstellen voor de kernset","Business control","Hoog",0],[1,"Eigenaar per KPI vaststellen","Directie","Midden",1],
+     [2,"Eerste dashboards bouwen","Business control","Hoog",0],
+     [3,"Dashboard automatisch vullen uit één bron","IT / finance","Midden",1],[4,"KPI's koppelen aan doelen, eigenaren en beloning","Directie","Midden",1]],
+    [[1,"Stuurcyclus en rapportagekalender vaststellen en publiceren","Business control","Hoog",1],[1,"Vaste agenda en actielijst voor de business review invoeren","Business control","Hoog",0],[1,"Besluitenlijst met eigenaar en datum invoeren","Directie","Midden",0],
+     [2,"Opvolging en effectmeting van acties borgen","Directie","Hoog",0],[2,"Bevoegdhedenmatrix vaststellen","Directie","Midden",1],
+     [3,"Maandelijkse forecast agenderen in het MT","Business control","Midden",0],[3,"Drempels voor afwijkingen vaststellen en koppelen aan de actielijst","Business control","Midden",0],
+     [4,"Besluiten volgen op hun financiële effect","Directie","Midden",0]]
   ];
   var LAAG_LBL=["1 · Financiële basis","2 · Business drivers","3 · KPI's","4 · Sturing"];
   var scores=[1,0,1,0];
@@ -464,17 +466,17 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
 
   /* Startroadmap: standaardacties voor alle niveaus boven het huidige niveau van elke laag */
   function planRows(){
-    var rows=Math.min.apply(null,scores)>=4?[]:[[0,"Nulmeting uitvoeren: interviews, scan per laag en top 5 knelpunten","Directie","Hoog","Alle lagen"]];
+    var rows=Math.min.apply(null,scores)>=4?[]:[[0,"Nulmeting uitvoeren: interviews, scan per laag en top 5 knelpunten","Directie","Hoog","Alle lagen",null,null,""]];
     scores.forEach(function(sc,i){
-      STD[i].forEach(function(a){ if(a[0]>sc) rows.push([phaseOfLevel(a[0]),fmt(a[1]),a[2],a[3],LAAG_LBL[i],sc,a[0]]); });
+      STD[i].forEach(function(a){ if(a[0]>sc) rows.push([phaseOfLevel(a[0]),fmt(a[1]),a[2],a[3],LAAG_LBL[i],sc,a[0],a[4]?"ja":""]); });
     });
     var prio={Hoog:0,Midden:1,Laag:2};
     rows.sort(function(a,b){return a[0]-b[0]||(parseInt(a[4])||0)-(parseInt(b[4])||0)||prio[a[3]]-prio[b[3]];});
     return rows;
   }
   function planText(){
-    var out=["Fase;Periode;Laag;Actie;Eigenaar;Prioriteit;Niveau nu;Niveau na"];
-    planRows().forEach(function(r){out.push([phases[r[0]].name,phases[r[0]].per,r[4],r[1],r[2],r[3],r[5]==null?"":r[5],r[6]==null?"":r[6]].join(";"));});
+    var out=["Fase;Periode;Laag;Actie;Eigenaar;Prioriteit;Niveau nu;Niveau na;Directiebesluit"];
+    planRows().forEach(function(r){out.push([phases[r[0]].name,phases[r[0]].per,r[4],r[1],r[2],r[3],r[5]==null?"":r[5],r[6]==null?"":r[6],r[7]||""].join(";"));});
     return out.join("\n");
   }
   function renderPlan(){
