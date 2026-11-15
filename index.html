@@ -236,8 +236,8 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
             <p class="note">Opent je e-mailprogramma met de uitkomst al ingevuld. Werkt dat niet? <button class="linkbtn" id="copyBtn" type="button">Kopieer de uitkomst</button> en mail naar tom@benable.nl.</p>
           </div>
           <div style="display:grid;gap:6px">
-            <button class="btn ghost" id="copyPlanBtn" type="button">Kopieer roadmap voor de planningstool</button>
-            <p class="note">Een startroadmap met standaardacties per laag, in het formaat van de B.Enable-planningstool (Roadmap inlezen). Ook te plakken in Excel.</p>
+            <button class="btn ghost" id="copyPlanBtn" type="button">Kopieer startroadmap</button>
+            <p class="note">Een startroadmap met standaardacties per laag, te plakken in Excel. In een traject met B.Enable volgt het implementatieplan uit de nulmeting in het framework.</p>
           </div>
           <button class="linkbtn" id="toPhase" type="button" style="justify-self:start">Bekijk jullie focusfase in het stappenplan →</button>
           <textarea id="copyFallback" aria-label="Tekst om te kopiëren" readonly></textarea>
@@ -552,7 +552,7 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
     }catch(e){fallback();}
   }
   document.getElementById("copyBtn").addEventListener("click",function(){copyOut(this,scanText(),"Kopieer de uitkomst");});
-  document.getElementById("copyPlanBtn").addEventListener("click",function(){copyOut(this,planText(),"Kopieer roadmap voor de planningstool");});
+  document.getElementById("copyPlanBtn").addEventListener("click",function(){copyOut(this,planText(),"Kopieer startroadmap");});
   document.getElementById("toPhase").addEventListener("click",function(){selectPhase(recPhase());document.getElementById("roadmap").scrollIntoView();});
 
   /* Roadmap */
