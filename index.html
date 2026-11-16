@@ -184,6 +184,38 @@ td .arrow{color:var(--hot);font-family:var(--mono)}
 .share input{font:inherit;font-size:.95rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
 .btn.big{font-size:1.02rem;padding:12px 16px}
 .linkbtn{background:none;border:0;padding:0;color:var(--cold);text-decoration:underline;cursor:pointer;font-size:.9rem}
+/* Rekenhulp: wanneer is het verbeterplan klaar? */
+.calc{margin-top:24px;display:grid;grid-template-columns:minmax(260px,.9fr) 1.6fr;gap:28px;align-items:start}
+@media (max-width:860px){.calc{grid-template-columns:1fr}}
+.calc h3{font-size:1.35rem}
+.calc-in{display:grid;gap:12px}
+.calc-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.calc-row:first-of-type{border-top:0}
+.calc-row b{display:block;font-family:var(--display);color:var(--ink)}
+.calc-row small{font-size:.82rem;color:var(--muted)}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.stepper button{border:0;background:var(--paper);width:34px;height:36px;cursor:pointer;font-size:1.1rem;color:var(--cold)}
+.stepper button:hover{background:var(--soft)}
+.stepper input{width:48px;border:0;text-align:center;font:600 1rem var(--mono);color:var(--ink);background:var(--surface);-moz-appearance:textfield}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.calc-out{display:grid;gap:16px}
+.calc-big{display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}
+.calc-big .v{font:800 3rem/1 var(--display);color:var(--cold)}
+.calc-big .v.late{color:var(--bad)}
+.calc-big .v small{font-size:1.1rem;margin-left:4px}
+.calc-tempo{border-left:5px solid var(--hot);background:color-mix(in srgb,var(--hot) 6%,var(--surface));border-radius:8px;padding:12px 14px;font-size:.95rem}
+.calc-tempo b.p{font:800 1.4rem var(--display);color:#A93A0E;margin-right:4px}
+.cbars{display:grid;gap:10px}
+.cbar{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:12px;align-items:center}
+@media (max-width:520px){.cbar{grid-template-columns:1fr}}
+.cbar .l b{display:block;font-size:.95rem}.cbar .l span{font-size:.82rem;color:var(--muted)}
+.ctrack{position:relative;height:34px;background:var(--paper);border-radius:6px}
+.cfill{height:34px;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;color:#fff;font:700 .95rem var(--display);min-width:56px;transition:width .3s}
+.cfill.base{background:var(--cold)}.cfill.late{background:var(--bad)}.cfill.inl{background:#2F5D8C}
+.cref{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--ink);pointer-events:none}
+.calc .note b{color:var(--ink)}
+.next{margin-top:24px;display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start}
+@media (max-width:860px){.next{grid-template-columns:1fr}}
 footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
 </style>
 </head>
@@ -225,24 +257,41 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
             <ol class="prio" id="advPrio"></ol>
           </div>
           <details class="plandet" id="planDet"><summary id="planSum">Jullie roadmap</summary><div id="planBody"></div></details>
-          <div class="share" id="share">
-            <h3>Ontvang een persoonlijke reactie</h3>
-            <p class="note" style="color:var(--ink)">Stuur je uitkomst naar Tom. Je krijgt binnen 2 werkdagen een reactie met de eerste drie stappen voor jullie organisatie.</p>
-            <div class="fields">
-              <label for="inpName">Naam (optioneel)<input id="inpName" type="text" autocomplete="name"></label>
-              <label for="inpOrg">Organisatie (optioneel)<input id="inpOrg" type="text" autocomplete="organization"></label>
-            </div>
-            <a class="btn big" id="mailBtn" href="mailto:tom@benable.nl">Stuur mijn uitkomst naar Tom</a>
-            <p class="note">Opent je e-mailprogramma met de uitkomst al ingevuld. Werkt dat niet? <button class="linkbtn" id="copyBtn" type="button">Kopieer de uitkomst</button> en mail naar tom@benable.nl.</p>
-          </div>
-          <div style="display:grid;gap:6px">
-            <button class="btn ghost" id="copyPlanBtn" type="button">Kopieer startroadmap</button>
-            <p class="note">Een startroadmap met standaardacties per laag, te plakken in Excel. In een traject met B.Enable volgt het implementatieplan uit de nulmeting in het framework.</p>
-          </div>
           <button class="linkbtn" id="toPhase" type="button" style="justify-self:start">Bekijk jullie focusfase in het stappenplan →</button>
-          <textarea id="copyFallback" aria-label="Tekst om te kopiëren" readonly></textarea>
           <p class="note"><span class="pill"><span class="sw" style="--c:var(--cold)"></span>huidig</span> <span class="pill"><span class="sw" style="--c:var(--hot)"></span>doelbeeld (niveau 4)</span></p>
         </aside>
+      </div>
+      <div class="card calc" id="rekenhulp">
+        <div class="calc-in">
+          <span class="kicker">Rekenhulp</span>
+          <h3>Wanneer is jullie verbeterplan klaar?</h3>
+          <p class="note">Op basis van de startroadmap uit je scan. Vul in hoeveel dagen per maand elke rol <b>naast het gewone werk</b> echt aan de verbeteringen kan besteden.</p>
+          <div id="calcRoles"></div>
+        </div>
+        <div class="calc-out" aria-live="polite">
+          <div class="calc-big"><div><div class="kicker">Klaar na</div><div class="v" id="calcEnd"></div></div><p class="note" id="calcEndTxt" style="flex:1;min-width:200px"></p></div>
+          <div class="calc-tempo" id="calcTempo"></div>
+          <div><div class="kicker" style="margin-bottom:8px">Wat als je een deel van hun werk tijdelijk inleent?</div><div class="cbars" id="calcBars"></div></div>
+          <p class="note" id="calcNote"></p>
+        </div>
+      </div>
+      <div class="next" id="vervolg">
+        <div class="share" id="share">
+          <h3>Ontvang een persoonlijke reactie</h3>
+          <p class="note" style="color:var(--ink)">Stuur je uitkomst en je doorrekening naar Tom. Je krijgt binnen 2 werkdagen een reactie met de eerste drie stappen voor jullie organisatie.</p>
+          <div class="fields">
+            <label for="inpName">Naam (optioneel)<input id="inpName" type="text" autocomplete="name"></label>
+            <label for="inpOrg">Organisatie (optioneel)<input id="inpOrg" type="text" autocomplete="organization"></label>
+          </div>
+          <a class="btn big" id="mailBtn" href="mailto:tom@benable.nl">Stuur mijn uitkomst naar Tom</a>
+          <p class="note">Opent je e-mailprogramma met de uitkomst al ingevuld. Werkt dat niet? <button class="linkbtn" id="copyBtn" type="button">Kopieer de uitkomst</button> en mail naar tom@benable.nl.</p>
+        </div>
+        <div class="card" style="display:grid;gap:10px;align-content:start">
+          <span class="kicker">Zelf aan de slag</span>
+            <button class="btn ghost" id="copyPlanBtn" type="button">Kopieer startroadmap</button>
+            <p class="note">Een startroadmap met standaardacties per laag, te plakken in Excel. In een traject met B.Enable volgt het implementatieplan uit de nulmeting in het framework.</p>
+          <textarea id="copyFallback" aria-label="Tekst om te kopiëren" readonly></textarea>
+        </div>
       </div>
     </div>
   </section>
@@ -516,6 +565,7 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
     document.querySelectorAll(".node").forEach(function(n){var p=+n.dataset.p;n.classList.toggle("show",p===rp&&m<4);});
     document.querySelectorAll(".tab").forEach(function(n){var p=+n.dataset.p;n.classList.toggle("show",p===rp&&m<4);});
     renderPlan();
+    renderCalc();
     updateMail();
   }
 
@@ -533,6 +583,8 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
     lines.push("");
     lines.push(m>=4?"Advies: alle lagen op niveau 4, jaarlijkse herijking.":"Advies: start met een nulmeting (eerste 2–4 weken van fase 1); daarna focus op fase "+(rp+1)+" – "+phases[rp].name+" ("+phases[rp].dur+").");
     if(planRows().length)lines.push("Startroadmap: "+planRows().length+" standaardacties (te kopiëren op de pagina).");
+    if(CALC){lines.push("");lines.push("Rekenhulp: "+ROLES.map(function(r){return r[1]+" "+CAP[r[0]]+" d/mnd";}).join(", ")+".");
+      lines.push("Klaar na "+CALC.basis.end+" maanden; "+CALC.opties.filter(function(o){return o.end<CALC.basis.end;}).map(function(o){return "met "+o.pc+"% inleen "+o.end+" maanden (circa "+rd5(o.dagen)+" dagen)";}).join(", ")+".");}
     return lines.join("\n");
   }
   function updateMail(){
@@ -554,6 +606,88 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
   document.getElementById("copyBtn").addEventListener("click",function(){copyOut(this,scanText(),"Kopieer de uitkomst");});
   document.getElementById("copyPlanBtn").addEventListener("click",function(){copyOut(this,planText(),"Kopieer startroadmap");});
   document.getElementById("toPhase").addEventListener("click",function(){selectPhase(recPhase());document.getElementById("roadmap").scrollIntoView();});
+
+  /* === REKENHULP ===
+     Rekent de startroadmap door met dezelfde regels als de B.Enable-planner (vereenvoudigd):
+     maat per actie op basis van de omschrijving (generieke standaardacties: S/M/L/XL = 2/6/12/24 dagen, 1/2/4/6 maanden; gekalibreerd zodat het voorbeeld bij standaardbeschikbaarheid rond 18 maanden uitkomt), elke fase start
+     als de vorige klaar is, een actie start pas als de betrokkenen ruimte hebben en wordt verlengd als hij
+     anders meer vraagt dan hun beschikbare dagen. Inleen telt als extra capaciteit (20 dagen per maand). */
+  var DAG={S:2,M:6,L:12,XL:24},MND={S:1,M:2,L:4,XL:6},TARIEF=800,FASE_W=[[1,3],[4,9],[10,18]];
+  var ROLES=[["Financial control","financial controller",8],["Business control","business controller",8],["Directie","directie / MT",2],["IT","IT",6]];
+  var CAP={};ROLES.forEach(function(r){CAP[r[0]]=r[2];});
+  var CALC=null;
+  function maatOf(t,eig){
+    if(/^nulmeting/i.test(t))return "S";
+    var m="M";
+    if(/koppeling|integratie|data ?warehouse|\bERP\b|migratie|bronsysteem|bronsystemen|automatisch|geautomatiseerd|herinrichting/i.test(t))m="XL";
+    else if(/dashboard|forecast|prognose|\bmodel\b|opzetten|inrichten|ontwikkel|begroting|kostprijs|allocatie|workflow|planningsproces|opbouwen/i.test(t))m="L";
+    else if(/vaststellen|vastleggen|begrippen|definitie|agenda|kalender|bevoegd|aanwijzen|benoemen|afspraken|borgen|akkoord|checklist|communiceren|publiceren/i.test(t))m="S";
+    if(m==="M"&&/^it\b/i.test(eig))m="L";
+    if(/\b(alle|volledig|meerdere)\b/i.test(t)&&m!=="XL")m={S:"M",M:"L",L:"XL"}[m];
+    return m;
+  }
+  function calcActs(){
+    return planRows().map(function(r,i){
+      var eig=r[2],uit=[];
+      if(/^IT \/ finance$/i.test(eig)){eig="IT";uit=[["Financial control",50]];}
+      var m=maatOf(r[1],eig);
+      return {id:i,f:r[0],tekst:r[1],eig:eig,uit:uit,prio:r[3],laag:parseInt(r[4])||9,maat:m,dur:MND[m]};
+    });
+  }
+  function sharesOf(a){var tot=0,out=[];a.uit.forEach(function(u){tot+=u[1];});if(tot<100)out.push([a.eig,(100-tot)/100]);a.uit.forEach(function(u){var f=out.filter(function(o){return o[0]===u[0];})[0];if(f)f[1]+=u[1]/100;else out.push([u[0],u[1]/100]);});return out;}
+  function capOfR(e){return e==="Inleen"?20:(CAP[e]>0?CAP[e]:0.5);}
+  function moveTo(a,from,pc){var own=sharesOf(a).filter(function(s){return s[0]===from;})[0];if(!own)return 0;var p=Math.min(pc,Math.round(own[1]*100));if(p<=0)return 0;
+    if(a.eig!==from){a.uit.forEach(function(u){if(u[0]===from)u[1]-=p;});a.uit=a.uit.filter(function(u){return u[1]>0;});}
+    var t=a.uit.filter(function(u){return u[0]==="Inleen";})[0];if(t)t[1]+=p;else a.uit.push(["Inleen",p]);return DAG[a.maat]*p/100;}
+  function inroosteren(acts){
+    var load={},rank={Hoog:0,Midden:1,Laag:2},MW={S:0,M:1,L:2,XL:3},prevEnd=0,fEnd=[];
+    acts.forEach(function(a){var need=1;sharesOf(a).forEach(function(s){need=Math.max(need,Math.ceil(DAG[a.maat]*s[1]/Math.max(0.5,capOfR(s[0]))-1e-9));});a.dur=Math.max(MND[a.maat],need);});
+    for(var f=0;f<3;f++){
+      var pool=acts.filter(function(a){return a.f===f;}).sort(function(a,b){return rank[a.prio]-rank[b.prio]||MW[a.maat]-MW[b.maat]||a.laag-b.laag;});
+      var base=f===0?FASE_W[0][0]:prevEnd+1;
+      pool.forEach(function(a){var s=base,sh=sharesOf(a);
+        for(var t=0;t<120;t++,s++){var ok=sh.every(function(x){var d=DAG[a.maat]*x[1]/a.dur;for(var m=s;m<s+a.dur;m++){var cur=(load[x[0]]||{})[m]||0;if(cur>0&&cur+d>capOfR(x[0])+1e-9)return false;}return true;});if(ok)break;}
+        a.start=s;sh.forEach(function(x){var d=DAG[a.maat]*x[1]/a.dur;load[x[0]]=load[x[0]]||{};for(var m=s;m<s+a.dur;m++)load[x[0]][m]=(load[x[0]][m]||0)+d;});});
+      if(pool.length)prevEnd=Math.max(prevEnd,Math.max.apply(null,pool.map(function(a){return a.start+a.dur-1;})));
+      fEnd.push(prevEnd);
+    }
+    var per={};acts.forEach(function(a){sharesOf(a).forEach(function(s){if(s[0]!=="Inleen")per[s[0]]=(per[s[0]]||0)+DAG[a.maat]*s[1];});});
+    return {end:prevEnd,fEnd:fEnd,per:per};
+  }
+  function kopie(acts){return acts.map(function(a){var b={};for(var k in a)b[k]=a[k];b.uit=a.uit.map(function(u){return u.slice();});return b;});}
+  function rekenen(){
+    var acts=calcActs();if(!acts.length)return null;
+    var basis=inroosteren(kopie(acts));
+    var tot=0,lijst=Object.keys(basis.per).map(function(e){tot+=basis.per[e];return [e,basis.per[e]];}).filter(function(x){return !/^directie/i.test(x[0]);}).sort(function(a,b){return b[1]-a[1];});
+    var top=lijst.slice(0,2).map(function(x){return x[0];}),aandeel=tot?lijst.slice(0,2).reduce(function(s,x){return s+x[1];},0)/tot:0;
+    var opties=[30,50].map(function(pc){var k=kopie(acts),dagen=0;k.forEach(function(a){top.forEach(function(e){dagen+=moveTo(a,e,pc);});});var r=inroosteren(k);return {pc:pc,end:r.end,dagen:dagen,kosten:dagen*TARIEF};});
+    return {acts:acts.length,basis:basis,top:top,aandeel:aandeel,opties:opties};
+  }
+  var ROLNAAM={"Financial control":"de financial controller","Business control":"de business controller","IT":"IT","Directie":"de directie"};
+  function en(a){return a.length<2?(a[0]||""):a.slice(0,-1).join(", ")+" en "+a[a.length-1];}
+  function rd5(v){return Math.round(v/5)*5;}
+  function eur(v){return "€ "+Math.round(v/1000).toLocaleString("nl-NL")+".000";}
+  function renderRoles(){
+    var box=document.getElementById("calcRoles");if(box.dataset.init)return;box.dataset.init=1;
+    box.innerHTML=ROLES.map(function(r,i){return '<div class="calc-row"><div><b>'+esc(r[1].charAt(0).toUpperCase()+r[1].slice(1))+'</b><small>dagen per maand voor verbeteren</small></div><div class="stepper"><button type="button" data-cs="'+i+':-1" aria-label="Minder dagen voor '+esc(r[1])+'">−</button><input id="cap-'+i+'" type="number" min="0.5" max="20" step="0.5" value="'+r[2]+'" aria-label="Dagen per maand voor '+esc(r[1])+'"><button type="button" data-cs="'+i+':1" aria-label="Meer dagen voor '+esc(r[1])+'">+</button></div></div>';}).join("");
+    ROLES.forEach(function(r,i){var inp=document.getElementById("cap-"+i);inp.addEventListener("change",function(){var v=parseFloat(String(inp.value).replace(",","."));CAP[r[0]]=Math.max(0.5,Math.min(20,isFinite(v)?v:r[2]));inp.value=CAP[r[0]];renderCalc();updateMail();});});
+    box.querySelectorAll("[data-cs]").forEach(function(b){b.addEventListener("click",function(){var p=b.dataset.cs.split(":"),r=ROLES[+p[0]],inp=document.getElementById("cap-"+p[0]);CAP[r[0]]=Math.max(0.5,Math.min(20,(CAP[r[0]]||0)+(+p[1])));inp.value=CAP[r[0]];renderCalc();updateMail();});});
+  }
+  function renderCalc(){
+    renderRoles();
+    CALC=rekenen();var endEl=document.getElementById("calcEnd");
+    if(!CALC){endEl.textContent="–";document.getElementById("calcEndTxt").textContent="Alle lagen staan op niveau 4: er is geen startroadmap om door te rekenen.";document.getElementById("calcTempo").innerHTML="";document.getElementById("calcBars").innerHTML="";document.getElementById("calcNote").textContent="";return;}
+    var b=CALC.basis,ROAD=FASE_W[2][1],late=b.end>ROAD;
+    endEl.className="v"+(late?" late":"");endEl.innerHTML=b.end+"<small>maanden</small>";
+    document.getElementById("calcEndTxt").textContent=CALC.acts+" acties. Indicatieve doorlooptijd van de drie fases is "+ROAD+" maanden; "+(late?"met deze beschikbaarheid duurt het "+(b.end-ROAD)+" maanden langer.":b.end<ROAD?"met deze beschikbaarheid kan het sneller.":"met deze beschikbaarheid past het precies.")+" Fase 1 klaar na "+b.fEnd[0]+", fase 2 na "+b.fEnd[1]+" maanden.";
+    var nm=CALC.top.map(function(e){return ROLNAAM[e]||e;});
+    document.getElementById("calcTempo").innerHTML='<b class="p">'+Math.round(CALC.aandeel*100)+'%</b> van het werk ligt bij '+esc(en(nm))+'. Zij bepalen het tempo: de rest van het plan wacht op hen.';
+    var rows=[["Zonder inleen",CAP[CALC.top[0]]+(CALC.top[1]?" en "+CAP[CALC.top[1]]:"")+" dagen per maand",b.end,late?"late":"base"]].concat(CALC.opties.filter(function(o){return o.end<b.end;}).map(function(o){return [o.pc+"% van hun werk inlenen","circa "+rd5(o.dagen)+" dagen · circa "+eur(o.kosten),o.end,"inl"];}));
+    if(rows.length===1)rows.push(["Tijdelijk inlenen","levert hier geen tijdwinst op",b.end,"inl"]);
+    var max=Math.max(ROAD+2,Math.max.apply(null,rows.map(function(r){return r[2];}))+1);
+    document.getElementById("calcBars").innerHTML=rows.map(function(r,i){return '<div class="cbar"><div class="l"><b>'+esc(r[0])+'</b><span>'+esc(r[1])+'</span></div><div class="ctrack"><div class="cfill '+r[3]+'" style="width:'+(r[2]/max*100).toFixed(1)+'%">'+r[2]+' mnd</div>'+(i===0?'<span class="cref" style="left:'+(ROAD/max*100).toFixed(1)+'%" title="Indicatieve doorlooptijd: '+ROAD+' maanden"></span>':'<span class="cref" style="left:'+(ROAD/max*100).toFixed(1)+'%"></span>')+'</div></div>';}).join("");
+    document.getElementById("calcNote").innerHTML="Gestippelde lijn: indicatieve doorlooptijd van "+ROAD+" maanden. Indicatief, op basis van standaardacties en standaardinschattingen; inleen tegen € "+TARIEF+" per dag. In de nulmeting maken we het plan op maat.";
+  }
 
   /* Roadmap */
   var tabs=document.getElementById("tabs");
