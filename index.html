@@ -271,7 +271,7 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
         <div class="calc-out" aria-live="polite">
           <div class="calc-big"><div><div class="kicker">Klaar na</div><div class="v" id="calcEnd"></div></div><p class="note" id="calcEndTxt" style="flex:1;min-width:200px"></p></div>
           <div class="calc-tempo" id="calcTempo"></div>
-          <div><div class="kicker" style="margin-bottom:8px">Wat als je een deel van hun werk tijdelijk inleent?</div><div class="cbars" id="calcBars"></div></div>
+          <div><div class="kicker" style="margin-bottom:8px">Wat als je een deel van het werk tijdelijk inleent?</div><div class="cbars" id="calcBars"></div></div>
           <p class="note" id="calcNote"></p>
         </div>
       </div>
@@ -640,28 +640,39 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
     if(a.eig!==from){a.uit.forEach(function(u){if(u[0]===from)u[1]-=p;});a.uit=a.uit.filter(function(u){return u[1]>0;});}
     var t=a.uit.filter(function(u){return u[0]==="Inleen";})[0];if(t)t[1]+=p;else a.uit.push(["Inleen",p]);return DAG[a.maat]*p/100;}
   function inroosteren(acts){
-    var load={},rank={Hoog:0,Midden:1,Laag:2},MW={S:0,M:1,L:2,XL:3},prevEnd=0,fEnd=[];
-    acts.forEach(function(a){var need=1;sharesOf(a).forEach(function(s){need=Math.max(need,Math.ceil(DAG[a.maat]*s[1]/Math.max(0.5,capOfR(s[0]))-1e-9));});a.dur=Math.max(MND[a.maat],need);});
+    var load={},rank={Hoog:0,Midden:1,Laag:2},MW={S:0,M:1,L:2,XL:3},prevEnd=0,fEnd=[],rem={};
+    function remt(e){if(e!=="Inleen")rem[e]=(rem[e]||0)+1;}
+    acts.forEach(function(a){var need=1,wie=null;sharesOf(a).forEach(function(s){var n=Math.ceil(DAG[a.maat]*s[1]/Math.max(0.5,capOfR(s[0]))-1e-9);if(n>need){need=n;wie=s[0];}});a.dur=Math.max(MND[a.maat],need);if(need>MND[a.maat]&&wie)remt(wie);});
     for(var f=0;f<3;f++){
       var pool=acts.filter(function(a){return a.f===f;}).sort(function(a,b){return rank[a.prio]-rank[b.prio]||MW[a.maat]-MW[b.maat]||a.laag-b.laag;});
       var base=f===0?FASE_W[0][0]:prevEnd+1;
-      pool.forEach(function(a){var s=base,sh=sharesOf(a);
-        for(var t=0;t<120;t++,s++){var ok=sh.every(function(x){var d=DAG[a.maat]*x[1]/a.dur;for(var m=s;m<s+a.dur;m++){var cur=(load[x[0]]||{})[m]||0;if(cur>0&&cur+d>capOfR(x[0])+1e-9)return false;}return true;});if(ok)break;}
+      pool.forEach(function(a){var s=base,sh=sharesOf(a),blok=null;
+        for(var t=0;t<120;t++,s++){var ok=sh.every(function(x){var d=DAG[a.maat]*x[1]/a.dur;for(var m=s;m<s+a.dur;m++){var cur=(load[x[0]]||{})[m]||0;if(cur>0&&cur+d>capOfR(x[0])+1e-9){blok=x[0];return false;}}return true;});if(ok)break;}
+        if(s>base&&blok)remt(blok);
         a.start=s;sh.forEach(function(x){var d=DAG[a.maat]*x[1]/a.dur;load[x[0]]=load[x[0]]||{};for(var m=s;m<s+a.dur;m++)load[x[0]][m]=(load[x[0]][m]||0)+d;});});
       if(pool.length)prevEnd=Math.max(prevEnd,Math.max.apply(null,pool.map(function(a){return a.start+a.dur-1;})));
       fEnd.push(prevEnd);
     }
     var per={};acts.forEach(function(a){sharesOf(a).forEach(function(s){if(s[0]!=="Inleen")per[s[0]]=(per[s[0]]||0)+DAG[a.maat]*s[1];});});
-    return {end:prevEnd,fEnd:fEnd,per:per};
+    return {end:prevEnd,fEnd:fEnd,per:per,rem:rem};
   }
   function kopie(acts){return acts.map(function(a){var b={};for(var k in a)b[k]=a[k];b.uit=a.uit.map(function(u){return u.slice();});return b;});}
   function rekenen(){
     var acts=calcActs();if(!acts.length)return null;
     var basis=inroosteren(kopie(acts));
-    var tot=0,lijst=Object.keys(basis.per).map(function(e){tot+=basis.per[e];return [e,basis.per[e]];}).filter(function(x){return !/^directie/i.test(x[0]);}).sort(function(a,b){return b[1]-a[1];});
-    var top=lijst.slice(0,2).map(function(x){return x[0];}),aandeel=tot?lijst.slice(0,2).reduce(function(s,x){return s+x[1];},0)/tot:0;
-    var opties=[30,50].map(function(pc){var k=kopie(acts),dagen=0;k.forEach(function(a){top.forEach(function(e){dagen+=moveTo(a,e,pc);});});var r=inroosteren(k);return {pc:pc,end:r.end,dagen:dagen,kosten:dagen*TARIEF};});
-    return {acts:acts.length,basis:basis,top:top,aandeel:aandeel,opties:opties};
+    var tot=0;Object.keys(basis.per).forEach(function(e){tot+=basis.per[e];});
+    /* Wie bepaalt het tempo: de rollen op wie acties moeten wachten (of die acties langer laten duren), niet per se de drukste. */
+    /* Gevoeligheid: met dubbele beschikbaarheid voor één rol, hoeveel eerder is het plan klaar? Wie het meeste scheelt, bepaalt het tempo. */
+    var winst={};ROLES.forEach(function(r){var e=r[0];if(!basis.per[e])return;var oud=CAP[e];CAP[e]=Math.min(40,oud*2);var w=basis.end-inroosteren(kopie(acts)).end;CAP[e]=oud;if(w>=2)winst[e]=w;});
+    var top=Object.keys(winst).sort(function(a,b){return winst[b]-winst[a]||(basis.rem[b]||0)-(basis.rem[a]||0)||(basis.per[b]||0)-(basis.per[a]||0);}).slice(0,2);
+    function optiesVoor(doel){return doel.length?[30,50].map(function(pc){var k=kopie(acts),dagen=0;k.forEach(function(a){doel.forEach(function(e){dagen+=moveTo(a,e,pc);});});var r=inroosteren(k);return {pc:pc,end:r.end,dagen:dagen,kosten:dagen*TARIEF};}):[];}
+    function beste(o){return o.length?Math.min.apply(null,o.map(function(x){return x.end;})):basis.end;}
+    var doel=top.filter(function(e){return !/^directie/i.test(e);}),opties=optiesVoor(doel);
+    /* Samen remmen kan anders uitpakken dan los: vergelijk ook de twee drukste rollen samen (zonder directie). */
+    if(top.length){var druk=Object.keys(basis.per).filter(function(e){return !/^directie/i.test(e);}).sort(function(a,b){return basis.per[b]-basis.per[a];}).slice(0,2);
+      if(druk.join()!==doel.join()){var o2=optiesVoor(druk);if(beste(o2)<beste(opties)-1){doel=druk;opties=o2;top=druk.concat(top.filter(function(e){return druk.indexOf(e)<0&&/^directie/i.test(e);})).slice(0,2);}}}
+    var aandeel=tot?top.reduce(function(s,e){return s+(basis.per[e]||0);},0)/tot:0;
+    return {acts:acts.length,basis:basis,top:top,doel:doel,aandeel:aandeel,opties:opties};
   }
   var ROLNAAM={"Financial control":"de financial controller","Business control":"de business controller","IT":"IT","Directie":"de directie"};
   function en(a){return a.length<2?(a[0]||""):a.slice(0,-1).join(", ")+" en "+a[a.length-1];}
@@ -679,11 +690,12 @@ footer{padding:28px 0 48px;color:var(--muted);font-size:.85rem;border-top:1px so
     if(!CALC){endEl.textContent="–";document.getElementById("calcEndTxt").textContent="Alle lagen staan op niveau 4: er is geen startroadmap om door te rekenen.";document.getElementById("calcTempo").innerHTML="";document.getElementById("calcBars").innerHTML="";document.getElementById("calcNote").textContent="";return;}
     var b=CALC.basis,ROAD=FASE_W[2][1],late=b.end>ROAD;
     endEl.className="v"+(late?" late":"");endEl.innerHTML=b.end+"<small>maanden</small>";
-    document.getElementById("calcEndTxt").textContent=CALC.acts+" acties. Indicatieve doorlooptijd van de drie fases is "+ROAD+" maanden; "+(late?"met deze beschikbaarheid duurt het "+(b.end-ROAD)+" maanden langer.":b.end<ROAD?"met deze beschikbaarheid kan het sneller.":"met deze beschikbaarheid past het precies.")+" Fase 1 klaar na "+b.fEnd[0]+", fase 2 na "+b.fEnd[1]+" maanden.";
-    var nm=CALC.top.map(function(e){return ROLNAAM[e]||e;});
-    document.getElementById("calcTempo").innerHTML='<b class="p">'+Math.round(CALC.aandeel*100)+'%</b> van het werk ligt bij '+esc(en(nm))+'. Zij bepalen het tempo: de rest van het plan wacht op hen.';
-    var rows=[["Zonder inleen",CAP[CALC.top[0]]+(CALC.top[1]?" en "+CAP[CALC.top[1]]:"")+" dagen per maand",b.end,late?"late":"base"]].concat(CALC.opties.filter(function(o){return o.end<b.end;}).map(function(o){return [o.pc+"% van hun werk inlenen","circa "+rd5(o.dagen)+" dagen · circa "+eur(o.kosten),o.end,"inl"];}));
-    if(rows.length===1)rows.push(["Tijdelijk inlenen","levert hier geen tijdwinst op",b.end,"inl"]);
+    document.getElementById("calcEndTxt").textContent=CALC.acts+" acties. Indicatieve doorlooptijd van de drie fases is "+ROAD+" maanden; "+(late?"met deze beschikbaarheid duurt het "+(b.end-ROAD)+(b.end-ROAD===1?" maand":" maanden")+" langer.":b.end<ROAD?"met deze beschikbaarheid kan het sneller.":"met deze beschikbaarheid past het precies.")+" Fase 1 klaar na "+b.fEnd[0]+", fase 2 na "+b.fEnd[1]+" maanden.";
+    var nm=CALC.top.map(function(e){return ROLNAAM[e]||e;}),een=CALC.top.length===1;
+    document.getElementById("calcTempo").innerHTML=CALC.top.length?'<b class="p">'+Math.round(CALC.aandeel*100)+'%</b> van het werk ligt bij '+esc(en(nm))+'. '+(een?'Die rol bepaalt':'Zij bepalen')+' het tempo: met meer tijd voor '+(een?'deze rol':'hen')+' is het plan eerder klaar.'+(CALC.doel.length<CALC.top.length?' Directiewerk kun je niet inlenen; daar helpt alleen meer tijd vrijmaken.':''):'<b>Niemand remt het plan.</b> De looptijd volgt uit de doorlooptijd van de acties en de volgorde van de fases; meer dagen of inleen maakt het niet sneller.';
+    var sub=CALC.doel.length?CALC.doel.map(function(e){return (ROLNAAM[e]||e).replace(/^de /,"")+" "+CAP[e];}).join(", ")+" dagen per maand":"huidige beschikbaarheid";
+    var rows=[["Zonder inleen",sub,b.end,late?"late":"base"]].concat((function(){var best=b.end;return CALC.opties.filter(function(o){if(o.end<best){best=o.end;return true;}return false;});})().map(function(o){return [o.pc+"% van "+(CALC.doel.length===1?"het werk van "+(ROLNAAM[CALC.doel[0]]||CALC.doel[0]):"hun werk")+" inlenen","circa "+rd5(o.dagen)+" dagen · circa "+eur(o.kosten),o.end,"inl"];}));
+    if(rows.length===1&&CALC.top.length)rows.push(["Tijdelijk inlenen","levert hier geen tijdwinst op",b.end,"inl"]);
     var max=Math.max(ROAD+2,Math.max.apply(null,rows.map(function(r){return r[2];}))+1);
     document.getElementById("calcBars").innerHTML=rows.map(function(r,i){return '<div class="cbar"><div class="l"><b>'+esc(r[0])+'</b><span>'+esc(r[1])+'</span></div><div class="ctrack"><div class="cfill '+r[3]+'" style="width:'+(r[2]/max*100).toFixed(1)+'%">'+r[2]+' mnd</div>'+(i===0?'<span class="cref" style="left:'+(ROAD/max*100).toFixed(1)+'%" title="Indicatieve doorlooptijd: '+ROAD+' maanden"></span>':'<span class="cref" style="left:'+(ROAD/max*100).toFixed(1)+'%"></span>')+'</div></div>';}).join("");
     document.getElementById("calcNote").innerHTML="Gestippelde lijn: indicatieve doorlooptijd van "+ROAD+" maanden. Indicatief, op basis van standaardacties en standaardinschattingen; inleen tegen € "+TARIEF+" per dag. In de nulmeting maken we het plan op maat.";
